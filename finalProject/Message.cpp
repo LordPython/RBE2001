@@ -5,6 +5,10 @@ namespace fc {
 
 const uint8_t Message::start_delim = 0x5F;
 
+Type Message::type() {
+    return _type;
+}
+
 int Message::encode(uint8_t* buffer, size_t len) {
     if (len < 6) return -1;
     int data_len = fill_data(buffer+5, len-6);
@@ -12,7 +16,7 @@ int Message::encode(uint8_t* buffer, size_t len) {
 
     buffer[0] = start_delim;
     buffer[1] = data_len + 5;
-    buffer[2] = type;
+    buffer[2] = _type;
     buffer[3] = src();
     buffer[4] = dst();
 
@@ -32,7 +36,7 @@ Message Message::decode(uint8_t* buffer, size_t len) {
 }
 
 void Message::decode(Message& msg, uint8_t* buffer, size_t len) {
-    msg.type = INVALID;
+    msg._type = INVALID;
     if (len < 6) return;
     if (buffer[0] != start_delim) return;
     int msg_len = buffer[1]+1;
@@ -48,7 +52,7 @@ void Message::decode(Message& msg, uint8_t* buffer, size_t len) {
 
     if(buffer[msg_len-1] == checksum) return;
 
-    msg.type = type;
+    msg._type = type;
 
     switch (type) {
         case STORAGE_AVAILABILITY: {
@@ -95,12 +99,12 @@ void Message::decode(Message& msg, uint8_t* buffer, size_t len) {
             break;
         }
         default:
-            msg.type = INVALID;
+            msg._type = INVALID;
     }
 }
 
 int Message::fill_data(uint8_t* buffer, size_t len) {
-    switch(type) {
+    switch(_type) {
         case STORAGE_AVAILABILITY:
             return msg.storageMessage.fill_data(buffer, len);
         case SUPPLY_AVAILABILITY:
@@ -120,38 +124,38 @@ int Message::fill_data(uint8_t* buffer, size_t len) {
     }
 }
 
-void Message::accept(MessageHandler& v) {
-    switch(type) {
+void Message::handleWith(MessageHandler& v) {
+    switch(_type) {
         case STORAGE_AVAILABILITY:
-            msg.storageMessage.accept(v);
+            msg.storageMessage.handleWith(v);
             break;
         case SUPPLY_AVAILABILITY:
-            msg.supplyMessage.accept(v);
+            msg.supplyMessage.handleWith(v);
             break;
         case RADIATION_ALERT:
-            msg.radiationMessage.accept(v);
+            msg.radiationMessage.handleWith(v);
             break;
         case STOP:
-            msg.stopMessage.accept(v);
+            msg.stopMessage.handleWith(v);
             break;
         case START:
-            msg.startMessage.accept(v);
+            msg.startMessage.handleWith(v);
             break;
         case ROBOT_STATUS:
-            msg.statusMessage.accept(v);
+            msg.statusMessage.handleWith(v);
             break;
         case HEARTBEAT:
-            msg.heartbeatMessage.accept(v);
+            msg.heartbeatMessage.handleWith(v);
             break;
         default:
             break;
     }
 }
 
-Message::Message() : type(INVALID) {}
+Message::Message() : _type(INVALID) {}
 
-Message::Message(const Message& other) : type(other.type) {
-    switch(other.type) {
+Message::Message(const Message& other) : _type(other._type) {
+    switch(other._type) {
         case STORAGE_AVAILABILITY:
             msg.storageMessage = other.msg.storageMessage;
             break;
@@ -174,43 +178,43 @@ Message::Message(const Message& other) : type(other.type) {
             msg.heartbeatMessage = other.msg.heartbeatMessage;
             break;
         default:
-            type = INVALID;
+            _type = INVALID;
             break;
     }
 }
 
 Message::Message(const StorageMessage& msg) {
-    this->type = STORAGE_AVAILABILITY;
+    this->_type = STORAGE_AVAILABILITY;
     this->msg.storageMessage = msg;
 }
 
 Message::Message(const SupplyMessage& msg) {
-    this->type = SUPPLY_AVAILABILITY;
+    this->_type = SUPPLY_AVAILABILITY;
     this->msg.supplyMessage = msg;
 }
 
 Message::Message(const RadiationMessage& msg) {
-    this->type = RADIATION_ALERT;
+    this->_type = RADIATION_ALERT;
     this->msg.radiationMessage = msg;
 }
 
 Message::Message(const StopMessage& msg) {
-    this->type = STOP;
+    this->_type = STOP;
     this->msg.stopMessage = msg;
 }
 
 Message::Message(const StartMessage& msg) {
-    this->type = START;
+    this->_type = START;
     this->msg.startMessage = msg;
 }
 
 Message::Message(const StatusMessage& msg) {
-    this->type = ROBOT_STATUS;
+    this->_type = ROBOT_STATUS;
     this->msg.statusMessage = msg;
 }
 
 Message::Message(const HeartbeatMessage& msg) {
-    this->type = HEARTBEAT;
+    this->_type = HEARTBEAT;
     this->msg.heartbeatMessage = msg;
 }
 
@@ -226,15 +230,15 @@ Type StatusMessage::type()    { return ROBOT_STATUS; }
 Type HeartbeatMessage::type() { return HEARTBEAT; }
 
 // ---------------------------------------------------------------------
-// ---------------------    Visitor Acceptors    -----------------------
+// ---------------------    Visitor handleWithors    -----------------------
 // ---------------------------------------------------------------------
-void StorageMessage::accept(MessageHandler& v)   { v.handle(*this); }
-void SupplyMessage::accept(MessageHandler& v)    { v.handle(*this); }
-void RadiationMessage::accept(MessageHandler& v) { v.handle(*this); }
-void StopMessage::accept(MessageHandler& v)      { v.handle(*this); }
-void StartMessage::accept(MessageHandler& v)     { v.handle(*this); }
-void StatusMessage::accept(MessageHandler& v)    { v.handle(*this); }
-void HeartbeatMessage::accept(MessageHandler& v) { v.handle(*this); }
+void StorageMessage::handleWith(MessageHandler& v)   { v.handle(*this); }
+void SupplyMessage::handleWith(MessageHandler& v)    { v.handle(*this); }
+void RadiationMessage::handleWith(MessageHandler& v) { v.handle(*this); }
+void StopMessage::handleWith(MessageHandler& v)      { v.handle(*this); }
+void StartMessage::handleWith(MessageHandler& v)     { v.handle(*this); }
+void StatusMessage::handleWith(MessageHandler& v)    { v.handle(*this); }
+void HeartbeatMessage::handleWith(MessageHandler& v) { v.handle(*this); }
 
 
 // ---------------------------------------------------------------------
@@ -282,7 +286,7 @@ int HeartbeatMessage::fill_data(uint8_t* buffer, size_t len) {
 // --------------------    Src/Dst extractors    -----------------------
 // ---------------------------------------------------------------------
 Address Message::src() {
-    switch(type) {
+    switch(_type) {
         case STORAGE_AVAILABILITY:
             return msg.storageMessage.src;
         case SUPPLY_AVAILABILITY:
@@ -303,7 +307,7 @@ Address Message::src() {
 }
 
 Address Message::dst() {
-    switch(type) {
+    switch(_type) {
         case STORAGE_AVAILABILITY:
             return msg.storageMessage.dst;
         case SUPPLY_AVAILABILITY:

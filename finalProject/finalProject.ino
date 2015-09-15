@@ -8,9 +8,6 @@ long last = 0;
 
 void setup() {
     Serial.begin(9600);
-    //pinMode(18, INPUT_PULLUP);
-    //pinMode(19, INPUT_PULLUP);
-    //Serial1.begin(115200);
     bt.init();
 }
 

@@ -51,7 +51,7 @@ private:
     int fill_data(uint8_t* buffer, size_t len);
 public:
     Type type();
-    void accept(MessageHandler& v);
+    void handleWith(MessageHandler& v);
     // Source address
     Address src;
     // Destination address
@@ -69,7 +69,7 @@ private:
     int fill_data(uint8_t* buffer, size_t len);
 public:
     Type type();
-    void accept(MessageHandler& v);
+    void handleWith(MessageHandler& v);
     // Source address
     Address src;
     // Destination address
@@ -87,7 +87,7 @@ private:
     int fill_data(uint8_t* buffer, size_t len);
 public:
     Type type();
-    void accept(MessageHandler& v);
+    void handleWith(MessageHandler& v);
     // Source address
     Address src;
     // Destination address
@@ -105,7 +105,7 @@ private:
     int fill_data(uint8_t* buffer, size_t len);
 public:
     Type type();
-    void accept(MessageHandler& v);
+    void handleWith(MessageHandler& v);
     // Source address
     Address src;
     // Destination address
@@ -118,7 +118,7 @@ private:
     int fill_data(uint8_t* buffer, size_t len);
 public:
     Type type();
-    void accept(MessageHandler& v);
+    void handleWith(MessageHandler& v);
     // Source address
     Address src;
     // Destination address
@@ -131,7 +131,7 @@ private:
     int fill_data(uint8_t* buffer, size_t len);
 public:
     Type type();
-    void accept(MessageHandler& v);
+    void handleWith(MessageHandler& v);
     // Source address
     Address src;
     // Destination address
@@ -164,7 +164,7 @@ private:
     int fill_data(uint8_t* buffer, size_t len);
 public:
     Type type();
-    void accept(MessageHandler& v);
+    void handleWith(MessageHandler& v);
     // Source address
     Address src;
     // Destination address
@@ -175,13 +175,14 @@ class Message {
 public:
     Address src();
     Address dst();
+    Type type();
     // Encode a message to a buffer
     int encode(uint8_t* buffer, size_t len);
     // Decode a message from a buffer
     static Message decode(uint8_t* buffer, size_t len);
     static void decode(Message& msg, uint8_t* buffer, size_t len);
-    // Accept a visitor
-    void accept(MessageHandler& v);
+    // handleWith a visitor
+    void handleWith(MessageHandler& v);
     // Copy Constructor
     Message(const Message& msg);
     // Construct from concrete message types
@@ -199,7 +200,7 @@ private:
 
     Message();
 
-    Type type;
+    Type _type;
     union {
         StorageMessage storageMessage;
         SupplyMessage supplyMessage;

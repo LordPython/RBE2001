@@ -5,7 +5,6 @@ BluetoothSystem::BluetoothSystem(fc::Address teamAddress)
 
 void BluetoothSystem::init()
 {
-    Serial1.begin(115200);
 }
 
 void BluetoothSystem::loop() 
@@ -27,7 +26,7 @@ void BluetoothSystem::loop()
     if(master.readPacket(msg)) {
         fc::Message m = fc::Message::decode(msg, sz);
         if (m.dst() == 0 || m.dst() == addr) {
-            m.accept(*this);
+            m.handleWith(*this);
         }
     }
 }
@@ -37,7 +36,6 @@ fc::Availability BluetoothSystem::storage() { return _storage; }
 bool BluetoothSystem::isEnabled() { return _enabled; }
 
 void BluetoothSystem::handle(const fc::StorageMessage& msg) {
-    //Serial.println("Got Storage Message");
     _storage = msg.availability.tubes;
 }
 
