@@ -1,6 +1,6 @@
 #pragma once
 
-#include <BluetoothMaster.h>
+#include <Arduino.h>
 #include "Message.h"
 
 class BluetoothSystem : private fc::MessageHandler {
@@ -18,7 +18,10 @@ private:
     fc::Address addr;
     fc::Availability _storage, _supply;
     bool _enabled;
-    BluetoothMaster master;
+    HardwareSerial& serial;
+
+    void send(byte* msg, size_t len);
+    bool read(byte* buf, size_t sz);
 
     virtual void handle(const fc::StorageMessage& msg);
     virtual void handle(const fc::SupplyMessage& msg);

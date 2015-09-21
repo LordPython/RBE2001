@@ -13,7 +13,7 @@ void setup() {
 
 void loop() {
     bt.loop();
-    long now = millis();
+    long now = millis();/*
     if((now - last) > 2*1000) {
         Serial.print("Storage: ");
         Serial.print(bt.storage().tube1);
@@ -33,5 +33,5 @@ void loop() {
         Serial.print(" ");
         Serial.println(bt.supply().tube4);
         last = now;
-    }
+    }*/
 }
