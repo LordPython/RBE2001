@@ -61,7 +61,7 @@ void BluetoothSystem::ReadActivity::run() {
         case READ_MSG:
             // Read bytes until
             buf[2+bytes_read++] = b;
-            if(bytes_read > len) {
+            if(bytes_read >= len-1) {
                 fc::Message m = fc::Message::decode(buf, BUF_SIZE);
                 if (m.dst() == 0 || m.dst() == addr) {
                     m.handleWith(*handler);
@@ -77,8 +77,6 @@ void BluetoothSystem::ReadActivity::run() {
 void BluetoothSystem::HeartbeatActivity::init(fc::Address addr) { this->addr = addr; }
 
 void BluetoothSystem::HeartbeatActivity::run() {
-    
-    Serial.println("run heartbeat");
     // Construct heartbeat message
     fc::HeartbeatMessage hbmsg;
     hbmsg.src = addr;

@@ -22,14 +22,21 @@ void StatusServer::handle(const fc::StorageMessage& msg) {
 
 void StatusServer::handle(const fc::SupplyMessage& msg) {
     _supply = msg.availability.tubes;
+    
+    Serial.println(msg.availability.byte);
+    Serial.flush();
 }
 
 void StatusServer::handle(const fc::StopMessage& msg) {
+    Serial.println("Stop");
+    Serial.flush();
     _enabled = false;
     // TODO: Flash LEDs!
 }
 
 void StatusServer::handle(const fc::StartMessage& msg) {
+    Serial.println("Start");
+    Serial.flush();
     _enabled = true;
     // TODO: Flash LEDs!
 }

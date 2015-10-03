@@ -34,6 +34,7 @@ void PlanSystem::PlanActivity::run() {
     case SLIDE_REACTOR_1:
         Serial.println("Slide reactor 1");
         robot->arm.setSlide(UP);
+        robot->status.setRadiationLevel(fc::RadiationMessage::SPENT);
         wait();
         state = ARM_REACTOR_1;
         break;
