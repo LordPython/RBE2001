@@ -1,93 +1,89 @@
 #include "BluetoothSystem.h"
+#include "Robot.h"
 
-BluetoothSystem::BluetoothSystem(fc::Address teamAddress) 
-    : addr(teamAddress), time_last_heartbeat(0), 
-      _enabled(false), serial(Serial3) {}
-
-void BluetoothSystem::init()
+void BluetoothSystem::init(Robot* robot)
 {
+    Serial.println("Bluetooth init");
+    Serial.flush();
     pinMode(14, INPUT_PULLUP);
     pinMode(15, INPUT_PULLUP);
-    serial.begin(115200);
+    Serial3.begin(115200);
+
+    // Initialize and schedule activities
+    read_act.init(&robot->status, robot->addr);
+    robot->schedule(read_act);
+
+    hb_act.init(robot->addr);
+    robot->schedule(hb_act);
 }
 
-void BluetoothSystem::loop() 
-{
-    long now = millis();
-    const int sz = 10;
-    byte msg[sz]; // Buffer for message
-    if ((now - time_last_heartbeat) > 2*1000)
-    {
-        fc::HeartbeatMessage hbmsg;
-        hbmsg.src = addr;
-        hbmsg.dst = 0;
-        int msg_len = fc::Message(hbmsg).encode(msg, sz);
-        send(msg, msg_len);
-        time_last_heartbeat = now;
-    }
-
-    if(read(msg, sz)) {
-        fc::Message m = fc::Message::decode(msg, sz);
-        if (m.dst() == 0 || m.dst() == addr) {
-            m.handleWith(*this);
-        }
-    }
+void BluetoothSystem::send(fc::Message msg) {
+    const size_t sz = 10;
+    byte buf[sz];
+    // Encode message
+    int msg_len = msg.encode(buf, sz);
+    // Send message
+    send(buf, msg_len);
 }
 
 void BluetoothSystem::send(byte* msg, size_t len) {
-    serial.flush();
-    serial.write(msg, len);
+    Serial3.flush();
+    Serial3.write(msg, len);
 }
 
-bool BluetoothSystem::read(byte* buf, size_t sz) {
-    if (sz <= 6) return false;
-    int len;
-    byte b;
-    unsigned char timeout;
-    while(serial.available()) {
-        b = serial.read();
-        if(b == 0x5f) {
-            buf[0] = b;
-            timeout = 255;
-            while(serial.available() == 0) {
-                if(--timeout == 0) return false;
-                delay(1);
+void BluetoothSystem::ReadActivity::init(fc::MessageHandler* handler, fc::Address addr) { this->handler = handler; this->addr = addr; }
+
+// Reads Serial3 data until there is no data to read
+// or until the next full message is read, whichever
+// comes first
+void BluetoothSystem::ReadActivity::run() {
+    //Serial.println("Running bluetooth");
+    int b;
+    while((b = Serial3.read()) >= 0) {
+        switch(state) {
+        case NO_MSG:
+            if(b == 0x5f) {
+                buf[0] = b;
+                state = READ_LEN;
             }
-            len = serial.read();
-            if (len+1 > sz) return false;
-            buf[1] = len;
-            timeout = 255;
-            while(serial.available() < len - 1) {
-                if(--timeout == 0) return false;
-                delay(1);
+            break;
+        case READ_LEN:
+            len = b;
+            bytes_read = 0;
+            if(len+1 > BUF_SIZE) {
+                // Error, couldn't fit message
+                state = NO_MSG;
+            } else {
+                // Valid length, move on
+                state = READ_MSG;
             }
-            for (int i = 0; i < len - 1; ++i) {
-                buf[2+i] = serial.read();
+            break;
+        case READ_MSG:
+            // Read bytes until
+            buf[2+bytes_read++] = b;
+            if(bytes_read > len) {
+                fc::Message m = fc::Message::decode(buf, BUF_SIZE);
+                if (m.dst() == 0 || m.dst() == addr) {
+                    m.handleWith(*handler);
+                }
+                state = NO_MSG;
+                return; // Process no more than 1 message at a time
             }
-            return true;
+            break;
         }
     }
-    return false;
 }
 
-fc::Availability BluetoothSystem::supply() { return _supply; }
-fc::Availability BluetoothSystem::storage() { return _storage; }
-bool BluetoothSystem::isEnabled() { return _enabled; }
+void BluetoothSystem::HeartbeatActivity::init(fc::Address addr) { this->addr = addr; }
 
-void BluetoothSystem::handle(const fc::StorageMessage& msg) {
-    _storage = msg.availability.tubes;
-    Serial.println(msg.availability.byte);
+void BluetoothSystem::HeartbeatActivity::run() {
+    
+    Serial.println("run heartbeat");
+    // Construct heartbeat message
+    fc::HeartbeatMessage hbmsg;
+    hbmsg.src = addr;
+    hbmsg.dst = 0;
+    BluetoothSystem::send(fc::Message(hbmsg));
+    // Run once a second
+    waitFor(1000);
 }
-
-void BluetoothSystem::handle(const fc::SupplyMessage& msg) {
-    _supply = msg.availability.tubes;
-}
-
-void BluetoothSystem::handle(const fc::StopMessage& msg) {
-    _enabled = false;
-}
-
-void BluetoothSystem::handle(const fc::StartMessage& msg) {
-    _enabled = true;
-}
-

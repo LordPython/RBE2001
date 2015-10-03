@@ -195,7 +195,7 @@ public:
     Message(const HeartbeatMessage& msg);
 private:
     static const uint8_t start_delim;
-    
+
     int fill_data(uint8_t* buffer, size_t len);
 
     Message();

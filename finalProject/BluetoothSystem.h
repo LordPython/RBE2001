@@ -2,29 +2,49 @@
 
 #include <Arduino.h>
 #include "Message.h"
+#include "Activity.h"
+
+class Robot;
 
 class BluetoothSystem : private fc::MessageHandler {
 public:
-    BluetoothSystem(fc::Address robotAddress);
-
     fc::Availability storage();
     fc::Availability supply();
-    bool isEnabled();
 
-    void init();
-    void loop();
+    static void send(fc::Message msg);
+
+    void init(Robot* robot);
 private:
-    long time_last_heartbeat;
-    fc::Address addr;
-    fc::Availability _storage, _supply;
-    bool _enabled;
-    HardwareSerial& serial;
+    Robot* robot;
 
-    void send(byte* msg, size_t len);
-    bool read(byte* buf, size_t sz);
+    static void send(byte* msg, size_t len);
 
-    virtual void handle(const fc::StorageMessage& msg);
-    virtual void handle(const fc::SupplyMessage& msg);
-    virtual void handle(const fc::StopMessage& msg);
-    virtual void handle(const fc::StartMessage& msg);
+    class ReadActivity : public Activity {
+    public:
+        void init(MessageHandler* handler, fc::Address addr);
+        virtual void run();
+        virtual Priority priority() { return MAIN; }
+    private:
+        enum {
+            NO_MSG, READ_LEN, READ_MSG,
+        } state;
+
+        static const size_t BUF_SIZE = 10;
+        byte buf[BUF_SIZE];
+
+        int len;
+        int bytes_read;
+
+        MessageHandler* handler;
+        fc::Address addr;
+    } read_act;
+
+    class HeartbeatActivity : public Activity {
+    public:
+        void init(fc::Address addr);
+        virtual void run();
+        virtual Priority priority() { return MAIN; }
+    private:
+        fc::Address addr;
+    } hb_act;
 };
