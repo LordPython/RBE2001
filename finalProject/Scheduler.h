@@ -4,54 +4,7 @@
 #include <stddef.h>
 
 #include "Activity.h"
-
-// A simple list
-template<typename T, size_t S>
-class List {
-public:
-    List() : _size(0) {}
-
-    inline size_t size() {
-        return _size;
-    }
-
-    void insert(T t) {
-        if(_size < S) {
-            array[_size++] = t;
-        } else {
-#ifdef DEBUG
-            Serial.println("Array overflow");
-            Serial.flush();
-#endif
-        }
-    }
-
-    bool remove(T t) {
-        for(int i = 0; i < _size; ++i) {
-            if(array[i] == t) {
-                --_size;
-                for (int j = i; j < _size; ++j) {
-                    array[j] = array[j+1];
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    T operator[](int i) {
-#ifdef DEBUG
-        if (i >= _size) {
-            Serial.println("Out of bounds array access");
-            Serial.flush();
-        }
-#endif
-        return array[i];
-    }
-private:
-    size_t _size;
-    T array[S];
-};
+#include "Util.h"
 
 // A very simple cooperative multitasking scheduler
 class Scheduler {

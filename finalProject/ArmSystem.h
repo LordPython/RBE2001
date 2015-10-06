@@ -24,9 +24,10 @@ private:
         void init(Robot* robot);
 
         void armAt(Setpoint set);
-        void gripperAt(Setpoint set);
         void slideAt(Setpoint set);
 
+        // No protection necessary on these variables, only ever modified
+        // by activities (not interrupts)
         inline void setArm(Setpoint set) { arm_desired = set; }
         inline void setGripper(Setpoint set) { gripper_desired = set; }
         inline void setSlide(Setpoint set) { slide_desired = set; }
@@ -35,6 +36,8 @@ private:
         inline Setpoint getGripper() { return gripper_desired; }
         inline Setpoint getSlide() { return slide_desired; }
     private:
+        void done();
+
         Setpoint arm_desired;
         Setpoint arm_cur;
 
@@ -63,18 +66,18 @@ private:
         void init(ArmIDA* arm_ida);
         virtual void run();
         virtual Priority priority() { return CONTROL_LOOP; }
-    private: 
+    private:
         ArmIDA* arm_ida;
         Motor slide_motor;
     } slide_act;
-    
+
     class GripperActivity : public Activity {
     public:
         void init(ArmIDA* arm_ida);
         virtual void run();
         virtual Priority priority() { return CONTROL_LOOP; }
-    private: 
-    
+    private:
+
         ArmIDA* arm_ida;
         Motor gripper_motor;
     } gripper_act;

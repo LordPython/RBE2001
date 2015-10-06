@@ -5,15 +5,16 @@
 static volatile bool run_control_loops;
 
 // 50 ms period for control loops
-const unsigned long k_controlLoopPeriod = 50000;
+const unsigned long k_controlLoopPeriod = 20000;
 
 void queueControlLoops() {
     run_control_loops = true;
 }
 
 void Scheduler::init() {
-    Serial.println("init scheduler");
-    Serial.flush();
+#ifdef DEBUG
+    Serial.println("Initializing Scheduler");
+#endif
     Timer1.initialize();
     Timer1.attachInterrupt(queueControlLoops, k_controlLoopPeriod);
     curActIdx = 0;
@@ -22,14 +23,16 @@ void Scheduler::init() {
 void Scheduler::schedule(Activity& act) {
     switch(act.priority()) {
     case CONTROL_LOOP:
+#ifdef DEBUG
         Serial.println("Scheduling a control loop");
-        Serial.flush();
+#endif
         control_loop_queue.insert(&act);
         break;
     case MAIN:
     default:
+#ifdef DEBUG
         Serial.println("Scheduling a main loop");
-        Serial.flush();
+#endif
         main_queue.insert(&act);
         break;
     }

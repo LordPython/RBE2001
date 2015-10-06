@@ -3,8 +3,11 @@
 
 void BluetoothSystem::init(Robot* robot)
 {
-    Serial.println("Bluetooth init");
-    Serial.flush();
+    Serial.println("Initializing Bluetooth System");
+    if (robot == NULL) {
+        Serial.println("Error: null robot in BluetoothSystem::init");
+        return;
+    }
     pinMode(14, INPUT_PULLUP);
     pinMode(15, INPUT_PULLUP);
     Serial3.begin(115200);
@@ -31,13 +34,18 @@ void BluetoothSystem::send(byte* msg, size_t len) {
     Serial3.write(msg, len);
 }
 
-void BluetoothSystem::ReadActivity::init(fc::MessageHandler* handler, fc::Address addr) { this->handler = handler; this->addr = addr; }
+void BluetoothSystem::ReadActivity::init(fc::MessageHandler* handler, fc::Address addr) { 
+    if(handler == NULL) {
+        Serial.println("Error: null handler in BluetoothSystem::ReadActivity::init");
+    }
+    this->handler = handler; 
+    this->addr = addr; 
+}
 
 // Reads Serial3 data until there is no data to read
 // or until the next full message is read, whichever
 // comes first
 void BluetoothSystem::ReadActivity::run() {
-    //Serial.println("Running bluetooth");
     int b;
     while((b = Serial3.read()) >= 0) {
         switch(state) {
@@ -51,7 +59,7 @@ void BluetoothSystem::ReadActivity::run() {
             len = b;
             bytes_read = 0;
             if(len+1 > BUF_SIZE) {
-                // Error, couldn't fit message
+                // Error, couldn't fit message in buffer
                 state = NO_MSG;
             } else {
                 // Valid length, move on
@@ -66,8 +74,9 @@ void BluetoothSystem::ReadActivity::run() {
                 if (m.dst() == 0 || m.dst() == addr) {
                     m.handleWith(*handler);
                 }
+                // Process no more than 1 message at a time
                 state = NO_MSG;
-                return; // Process no more than 1 message at a time
+                return;
             }
             break;
         }

@@ -3,6 +3,7 @@
 #include <QTRSensors.h>
 
 #include "Robot.h"
+#include "Ports.h"
 
 #define DEBUG
 
@@ -14,6 +15,10 @@ void setup() {
     Serial.begin(9600);
 //#endif
     robot.init(TEAM);
+    pinMode(START_BUTTON_PORT, INPUT_PULLUP);
+    while(digitalRead(START_BUTTON_PORT)) {
+        robot.nav.calibrate();
+    }
 }
 
 void loop() {

@@ -1,3 +1,5 @@
+#pragma once
+
 class PID {
 public:
     inline void init(float p, float i, float d, int deadband = 0) {
@@ -5,7 +7,12 @@ public:
     }
 
     inline int calc(int error) {
-        if (abs(error)<deadband) return 0;
+        if (abs(error)<deadband) {
+            // If we're within the deadband, 
+            // zero out accumulated error.
+            accum = 0;
+            return 0;
+        }
         float result = p*error + i*accum + d*(error-last_error);
         accum += error;
         last_error = error;

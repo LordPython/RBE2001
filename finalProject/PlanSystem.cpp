@@ -14,6 +14,8 @@ void PlanSystem::next() {
 void PlanSystem::PlanActivity::init(Robot* robot) {
     this->robot = robot;
     reactor = REACTOR_A;
+    // Wait for robot to get into default state.
+    wait();
 }
 
 void PlanSystem::PlanActivity::run() {
@@ -45,6 +47,8 @@ void PlanSystem::PlanActivity::run() {
         state = GO_TO_STORAGE;
         break;
     case GO_TO_STORAGE:
+        Serial.println("Go to storage");
+        robot->nav.go(STORAGE_1);
         // Pick empty storage
         // Nav there
         wait();
@@ -57,10 +61,12 @@ void PlanSystem::PlanActivity::run() {
         break;
     case GRIP_STORAGE:
         robot->arm.setGripper(OPEN);
+        // No feedback on the gripper, wait 1 second
         waitFor(1000);
         state = GO_TO_SUPPLY;
         break;
     case GO_TO_SUPPLY:
+        robot->nav.go(SUPPLY_3);
         // pick filled supply
         // Nav there
         wait();
