@@ -217,7 +217,6 @@ void NavSystem::go(Location loc) {
     // Every navigation ends at a limit
     commands.insert(Command(FOLLOW_LIMIT));
     next();
-
 }
 
 void NavSystem::calibrate() {
@@ -359,15 +358,6 @@ void NavSystem::NavActivity::run() {
         nav->stop();
         break;
     }
-    /*
-    if (intersections < 3) {
-        bool intersection = followLine();
-        if(intersection) intersections++;
-    } else {
-        // Stop
-        nav->stop();
-    }
-    */
 }
 
 
