@@ -45,7 +45,7 @@ private:
     Location current;
 
     enum CommandType {
-        BACK_UP, TURN_AROUND, TURN_LEFT, TURN_RIGHT, FOLLOW_LIMIT, FOLLOW_COUNT, DONE,
+        BACK_UP, FORWARD, TURN_AROUND, TURN_LEFT, TURN_RIGHT, FOLLOW_LIMIT, FOLLOW_COUNT, DONE,
     };
     
     struct Command {

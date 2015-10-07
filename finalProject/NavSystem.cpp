@@ -33,34 +33,42 @@ void NavSystem::go(Location loc) {
         switch(desired) {
         case SUPPLY_1:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case SUPPLY_2:
             commands.insert(Command(FOLLOW_COUNT, 2));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case SUPPLY_3:
             commands.insert(Command(FOLLOW_COUNT, 3));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case SUPPLY_4:
             commands.insert(Command(FOLLOW_COUNT, 4));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case STORAGE_1:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case STORAGE_2:
             commands.insert(Command(FOLLOW_COUNT, 2));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case STORAGE_3:
             commands.insert(Command(FOLLOW_COUNT, 3));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case STORAGE_4:
             commands.insert(Command(FOLLOW_COUNT, 4));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         }
@@ -69,34 +77,42 @@ void NavSystem::go(Location loc) {
         switch(desired) {
         case SUPPLY_1:
             commands.insert(Command(FOLLOW_COUNT, 4));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_2:
             commands.insert(Command(FOLLOW_COUNT, 3));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_3:
             commands.insert(Command(FOLLOW_COUNT, 2));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_4:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case STORAGE_1:
             commands.insert(Command(FOLLOW_COUNT, 4));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case STORAGE_2:
             commands.insert(Command(FOLLOW_COUNT, 3));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case STORAGE_3:
             commands.insert(Command(FOLLOW_COUNT, 2));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case STORAGE_4:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         }
@@ -108,10 +124,12 @@ void NavSystem::go(Location loc) {
         switch(desired) {
         case REACTOR_A:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case REACTOR_B:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         }
@@ -122,20 +140,26 @@ void NavSystem::go(Location loc) {
             break;
         case SUPPLY_2:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case SUPPLY_3:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             commands.insert(Command(FOLLOW_COUNT, 2));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case SUPPLY_4:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             commands.insert(Command(FOLLOW_COUNT, 3));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         }
@@ -144,22 +168,28 @@ void NavSystem::go(Location loc) {
         switch(desired) {
         case SUPPLY_1:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_2:
             break;
         case SUPPLY_3:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         case SUPPLY_4:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             commands.insert(Command(FOLLOW_COUNT, 2));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         }
@@ -168,22 +198,28 @@ void NavSystem::go(Location loc) {
         switch(desired) {
         case SUPPLY_1:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             commands.insert(Command(FOLLOW_COUNT, 2));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_2:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_3:
             break;
         case SUPPLY_4:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             break;
         }
@@ -192,20 +228,26 @@ void NavSystem::go(Location loc) {
         switch(desired) {
         case SUPPLY_1:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             commands.insert(Command(FOLLOW_COUNT, 3));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_2:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             commands.insert(Command(FOLLOW_COUNT, 2));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_3:
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_RIGHT));
             commands.insert(Command(FOLLOW_COUNT, 1));
+            commands.insert(Command(FORWARD));
             commands.insert(Command(TURN_LEFT));
             break;
         case SUPPLY_4:
@@ -281,9 +323,19 @@ void NavSystem::NavActivity::run() {
             nav->drive(45,-45);
         }
         break;
-    case TURN_AROUND:
+    case FORWARD:
+        if (timeSinceLastState > 300) {
+            nav->stop();
+            nav->next();
+            lastStateTime = now;
+            done_pause = false;
+        } else {
+            nav->drive(-45,45);
+        }
+        break;
+    case TURN_AROUND: {
+        int error = nav->qtrrc8.readLine(sensorValues) - 3500;
         if (timeSinceLastState > 2500) {
-            int error = nav->qtrrc8.readLine(sensorValues) - 3500;
             int diff = pid.calc(error);
             nav->drive(diff, diff);
             
@@ -297,14 +349,17 @@ void NavSystem::NavActivity::run() {
             nav->drive(45,45);
         }
         break;
+    }
     case TURN_LEFT: {
-        nav->qtrrc8.readLine(sensorValues);
+        int position = nav->qtrrc8.readLine(sensorValues);
         long sum = 0;
         for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
             sum += sensorValues[i];
         }
-        if(sum < 400) {
+        //if(sum < 400) {
         //if(now-lastStateTime > 1000) {
+        
+        if (timeSinceLastState > 700 && ((position > 3000 && position < 4000))) {
             nav->stop();
             nav->next();
             lastStateTime = now;
@@ -315,13 +370,14 @@ void NavSystem::NavActivity::run() {
         break;
     }
     case TURN_RIGHT: {
-        nav->qtrrc8.readLine(sensorValues);
+        int position = nav->qtrrc8.readLine(sensorValues);
         long sum = 0;
         for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
             sum += sensorValues[i];
         }
-        if(sum < 400) {
+        //if(sum < 400) {
         //if(timeSinceLastState > 1000) {
+        if (timeSinceLastState > 700 && ((position > 3000 && position < 4000))) {
             nav->stop();
             nav->next();
             lastStateTime = now;
