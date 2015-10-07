@@ -22,9 +22,6 @@ void StatusServer::handle(const fc::StorageMessage& msg) {
 
 void StatusServer::handle(const fc::SupplyMessage& msg) {
     _supply = msg.availability.tubes;
-    
-    Serial.println(msg.availability.byte);
-    Serial.flush();
 }
 
 void StatusServer::handle(const fc::StopMessage& msg) {

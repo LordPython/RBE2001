@@ -3,8 +3,8 @@
 #include "Ports.h"
 
 // analog setpoints for arm up and down positions
-const int k_arm_up_setpoint = 285;
-const int k_arm_down_setpoint = 679;
+const int k_arm_up_setpoint = 302;
+const int k_arm_down_setpoint = 669;
 
 void ArmSystem::init(Robot* robot) {
     pinMode(SLIDE_TOP_SWITCH_PORT, INPUT_PULLUP);

@@ -297,6 +297,10 @@ void NavSystem::NavActivity::resetStateTime() {
 }
 
 void NavSystem::NavActivity::run() {
+    if(!nav->robot->status.enabled()) {
+        nav->stop();
+        return;
+    }
     unsigned int sensorValues[NUM_SENSORS];
     unsigned long now = millis();
     unsigned long timeSinceLastState = now-lastStateTime;
@@ -324,7 +328,7 @@ void NavSystem::NavActivity::run() {
         }
         break;
     case FORWARD:
-        if (timeSinceLastState > 300) {
+        if (timeSinceLastState > 200) {
             nav->stop();
             nav->next();
             lastStateTime = now;
@@ -335,7 +339,7 @@ void NavSystem::NavActivity::run() {
         break;
     case TURN_AROUND: {
         int error = nav->qtrrc8.readLine(sensorValues) - 3500;
-        if (timeSinceLastState > 2500) {
+        if (timeSinceLastState > 2000) {
             int diff = pid.calc(error);
             nav->drive(diff, diff);
             
@@ -359,7 +363,7 @@ void NavSystem::NavActivity::run() {
         //if(sum < 400) {
         //if(now-lastStateTime > 1000) {
         
-        if (timeSinceLastState > 700 && ((position > 3000 && position < 4000))) {
+        if (timeSinceLastState > 600 && ((position > 3000 && position < 4000))) {
             nav->stop();
             nav->next();
             lastStateTime = now;

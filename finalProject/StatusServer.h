@@ -8,8 +8,8 @@ class StatusServer : public fc::MessageHandler {
 public:
     void init(Robot* robot);
 
-    fc::Availability storage();
-    fc::Availability supply();
+    inline fc::Availability storage() { return _storage; }
+    inline fc::Availability supply() { return _supply; }
 
     inline bool enabled() { return _enabled; }
 

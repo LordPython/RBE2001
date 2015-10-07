@@ -27,12 +27,25 @@ void PlanSystem::PlanActivity::run() {
         wait();
         state = GRIP_REACTOR_1;
         break;
-    case GRIP_REACTOR_1:
+    case GRIP_REACTOR_1: {
         Serial.println("Grip reactor 1");
         robot->arm.setGripper(CLOSE);
+        fc::Availability storage = robot->status.storage();
+        fc::Availability supply = robot->status.supply();
+        Serial.print("Storage status: ");
+        Serial.print(storage.tube1);
+        Serial.print(storage.tube2);
+        Serial.print(storage.tube3);
+        Serial.println(storage.tube4);
+        Serial.print("Supply status: ");
+        Serial.print(supply.tube1);
+        Serial.print(supply.tube2);
+        Serial.print(supply.tube3);
+        Serial.println(supply.tube4);
         waitFor(1000);
-        state = SLIDE_REACTOR_1;
+        state = SLIDE_REACTOR_1;//GRIP_REACTOR_1;//SLIDE_REACTOR_1;
         break;
+    }
     case SLIDE_REACTOR_1:
         Serial.println("Slide reactor 1");
         robot->arm.setSlide(UP);
@@ -46,14 +59,24 @@ void PlanSystem::PlanActivity::run() {
         wait();
         state = GO_TO_STORAGE;
         break;
-    case GO_TO_STORAGE:
+    case GO_TO_STORAGE: {
         Serial.println("Go to storage");
-        robot->nav.go(STORAGE_1);
+        fc::Availability storage = robot->status.storage();
+        Serial.print("Storage status: ");
+        Serial.print(storage.tube1);
+        Serial.print(storage.tube2);
+        Serial.print(storage.tube3);
+        Serial.println(storage.tube4);
+        if(!storage.tube1) robot->nav.go(STORAGE_1);
+        else if(!storage.tube2) robot->nav.go(STORAGE_2);
+        else if(!storage.tube3) robot->nav.go(STORAGE_3);
+        else if(!storage.tube4) robot->nav.go(STORAGE_4);
         // Pick empty storage
         // Nav there
         wait();
         state = SLIDE_STORAGE;
         break;
+    }
     case SLIDE_STORAGE:
         robot->arm.setSlide(DOWN);
         wait();
@@ -65,13 +88,27 @@ void PlanSystem::PlanActivity::run() {
         waitFor(1000);
         state = GO_TO_SUPPLY;
         break;
-    case GO_TO_SUPPLY:
-        robot->nav.go(SUPPLY_3);
+    case GO_TO_SUPPLY: {      
+        fc::Availability supply = robot->status.supply();
+        Serial.print("Supply status: ");
+        Serial.print(supply.tube1);
+        Serial.print(supply.tube2);
+        Serial.print(supply.tube3);
+        Serial.println(supply.tube4);
+        if(supply.tube1) robot->nav.go(SUPPLY_1);
+        else if(supply.tube2) robot->nav.go(SUPPLY_2);
+        else if(supply.tube3) robot->nav.go(SUPPLY_3);
+        else if(supply.tube4) robot->nav.go(SUPPLY_4);
+        else {
+            Serial.println("No availabe supply, going to supply 1");
+            robot->nav.go(SUPPLY_1);
+        }
         // pick filled supply
         // Nav there
         wait();
         state = GRIP_SUPPLY;
         break;
+    }
     case GRIP_SUPPLY:
         robot->arm.setGripper(CLOSE);
         waitFor(1000);
@@ -79,6 +116,7 @@ void PlanSystem::PlanActivity::run() {
         break;
     case SLIDE_SUPPLY:
         robot->arm.setSlide(UP);
+        robot->status.setRadiationLevel(fc::RadiationMessage::NEW);
         wait();
         state = GO_TO_REACTOR_2;
         break;
