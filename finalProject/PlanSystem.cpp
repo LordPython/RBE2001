@@ -49,7 +49,7 @@ void PlanSystem::PlanActivity::run() {
     case SLIDE_REACTOR_1:
         Serial.println("Slide reactor 1");
         robot->arm.setSlide(UP);
-        robot->status.setRadiationLevel(fc::RadiationMessage::SPENT);
+        robot->status.setRadiationLevel(LOW_RAD);
         wait();
         state = ARM_REACTOR_1;
         break;
@@ -87,6 +87,7 @@ void PlanSystem::PlanActivity::run() {
         // No feedback on the gripper, wait 1 second
         waitFor(1000);
         state = GO_TO_SUPPLY;
+        robot->status.setRadiationLevel(NO_RAD);
         break;
     case GO_TO_SUPPLY: {      
         fc::Availability supply = robot->status.supply();
@@ -116,7 +117,7 @@ void PlanSystem::PlanActivity::run() {
         break;
     case SLIDE_SUPPLY:
         robot->arm.setSlide(UP);
-        robot->status.setRadiationLevel(fc::RadiationMessage::NEW);
+        robot->status.setRadiationLevel(HIGH_RAD);
         wait();
         state = GO_TO_REACTOR_2;
         break;
@@ -144,6 +145,7 @@ void PlanSystem::PlanActivity::run() {
         } else {
             state = END;
         }
+        robot->status.setRadiationLevel(NO_RAD);
         break;
     case END:
     default:

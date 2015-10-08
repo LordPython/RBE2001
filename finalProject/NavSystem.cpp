@@ -339,11 +339,11 @@ void NavSystem::NavActivity::run() {
         break;
     case TURN_AROUND: {
         int error = nav->qtrrc8.readLine(sensorValues) - 3500;
-        if (timeSinceLastState > 2000) {
+        if (timeSinceLastState > 2400) {
             int diff = pid.calc(error);
             nav->drive(diff, diff);
             
-            if(error < 100) {
+            if(error < 300) {
                 nav->stop();
                 nav->next();
                 lastStateTime = now;

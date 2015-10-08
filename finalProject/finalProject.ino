@@ -1,3 +1,4 @@
+#include <LiquidCrystal.h>
 #include <Servo.h>
 #include <TimerOne.h>
 #include <QTRSensors.h>
