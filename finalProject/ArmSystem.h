@@ -8,7 +8,8 @@ class Robot;
 
 enum Setpoint {
     UP, DOWN,
-    OPEN = UP, CLOSE = DOWN
+    OPEN = UP, CLOSE = DOWN,
+    UNDEFINED,
 };
 
 class ArmSystem {

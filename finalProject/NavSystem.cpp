@@ -271,7 +271,7 @@ void NavSystem::drive(int left, int right) {
 }
 
 void NavSystem::next() {
-    current = desired;
+    //current = desired;
     bool available = commands.pop(current_command);
 
     if(!available) {
@@ -317,16 +317,21 @@ void NavSystem::NavActivity::run() {
     }
 
     switch (nav->current_command.type) {
-    case BACK_UP:
-        if (timeSinceLastState > 600) {
+    case BACK_UP: {
+        int back_up_time = 400;
+        if (nav->current == REACTOR_B) {
+            back_up_time = 2000;
+        }
+        if (timeSinceLastState > back_up_time) {
             nav->stop();
             nav->next();
             lastStateTime = now;
             done_pause = false;
         } else {
-            nav->drive(45,-45);
+            nav->drive(50,-50);
         }
         break;
+    }
     case FORWARD:
         if (timeSinceLastState > 200) {
             nav->stop();
@@ -334,12 +339,12 @@ void NavSystem::NavActivity::run() {
             lastStateTime = now;
             done_pause = false;
         } else {
-            nav->drive(-45,45);
+            nav->drive(-50,50);
         }
         break;
     case TURN_AROUND: {
         int error = nav->qtrrc8.readLine(sensorValues) - 3500;
-        if (timeSinceLastState > 2400) {
+        if (timeSinceLastState > 1100) {
             int diff = pid.calc(error);
             nav->drive(diff, diff);
             
@@ -350,7 +355,7 @@ void NavSystem::NavActivity::run() {
                 done_pause = false;
             }
         } else {
-            nav->drive(45,45);
+            nav->drive(90,90);
         }
         break;
     }
@@ -369,7 +374,7 @@ void NavSystem::NavActivity::run() {
             lastStateTime = now;
             done_pause = false;
         } else {
-            nav->drive(45,45);
+            nav->drive(50,50);
         }
         break;
     }
@@ -387,7 +392,7 @@ void NavSystem::NavActivity::run() {
             lastStateTime = now;
             done_pause = false;
         } else {
-            nav->drive(-45,-45);
+            nav->drive(-50,-50);
         }
         break;
     }
@@ -429,7 +434,7 @@ bool NavSystem::NavActivity::followLine() {
 
     bool intersection = false;
 
-    if (now - lastLineTime > 800) {
+    if (now - lastLineTime > 500) {
         long sum = 0;
         for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
             sum += sensorValues[i];
@@ -441,9 +446,10 @@ bool NavSystem::NavActivity::followLine() {
     }
 
     int diff = pid.calc(position - 3500);
-    const int baseSpeed = 40;
+    const int leftBaseSpeed = 40;
+    const int rightBaseSpeed = 55;
 
-    nav->drive(diff - baseSpeed, diff + baseSpeed);
+    nav->drive(diff - leftBaseSpeed, diff + rightBaseSpeed);
 
     return intersection;
 }

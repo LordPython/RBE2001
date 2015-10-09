@@ -31,6 +31,8 @@ void ArmSystem::setGripper(Setpoint set) { arm_ida.setGripper(set); }
 
 void ArmSystem::ArmIDA::init(Robot* robot) {
     this->robot = robot;
+    arm_cur = UNDEFINED;
+    slide_cur = UNDEFINED;
 }
 
 void ArmSystem::ArmIDA::armAt(Setpoint set) {
@@ -65,7 +67,7 @@ void ArmSystem::ArmIDA::done() {
 void ArmSystem::ArmActivity::init(ArmIDA* arm_ida) {
     this->arm_ida = arm_ida;
     arm_ida->setArm(DOWN);
-    pid.init(0.8, 0.005, 1.0, 5);
+    pid.init(0.8, 0.005, 2.5, 5);
     arm_motor.init(ARM_MOTOR_PORT);
 }
 
