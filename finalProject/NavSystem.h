@@ -26,6 +26,7 @@ class NavSystem {
 public:
     NavSystem() : qtrrc8(SENSOR_PINS, NUM_SENSORS, TIMEOUT, EMITTER_PIN) {}
     void init(Robot* robot);
+    void start();
     void go(Location loc);
     void calibrate();
 

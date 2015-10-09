@@ -9,6 +9,7 @@
 
 struct Robot : public Scheduler {
     void init(fc::Address addr);
+    void start();
 
     fc::Address addr;
 
@@ -17,4 +18,6 @@ struct Robot : public Scheduler {
     PlanSystem planner;
     NavSystem nav;
     StatusServer status;
+private:
+    bool started;
 };

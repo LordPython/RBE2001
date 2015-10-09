@@ -11,5 +11,15 @@ void Robot::init(fc::Address addr) {
     planner.init(this);
     nav.init(this);
     arm.init(this);
+    started = false;
+}
+
+void Robot::start() {
+    if(!started) {
+        started = true;
+        planner.start();
+        nav.start();
+        arm.start();
+    }
 }
 

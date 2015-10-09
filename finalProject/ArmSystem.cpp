@@ -3,10 +3,12 @@
 #include "Ports.h"
 
 // analog setpoints for arm up and down positions
-const int k_arm_up_setpoint = 280;
-const int k_arm_down_setpoint = 676;
+const int k_arm_up_setpoint = 283;
+const int k_arm_down_setpoint = 673;
 
 void ArmSystem::init(Robot* robot) {
+    this->robot = robot;
+    
     pinMode(SLIDE_TOP_SWITCH_PORT, INPUT_PULLUP);
     pinMode(SLIDE_BOTTOM_SWITCH_PORT, INPUT_PULLUP);
 
@@ -15,7 +17,9 @@ void ArmSystem::init(Robot* robot) {
     arm_act.init(&arm_ida);
     slide_act.init(&arm_ida);
     gripper_act.init(&arm_ida);
+}
 
+void ArmSystem::start() {
     robot->schedule(arm_act);
     robot->schedule(slide_act);
     robot->schedule(gripper_act);
@@ -67,7 +71,7 @@ void ArmSystem::ArmIDA::done() {
 void ArmSystem::ArmActivity::init(ArmIDA* arm_ida) {
     this->arm_ida = arm_ida;
     arm_ida->setArm(DOWN);
-    pid.init(0.8, 0.005, 2.5, 5);
+    pid.init(0.8, 0.005, 2.5, 7);
     arm_motor.init(ARM_MOTOR_PORT);
 }
 

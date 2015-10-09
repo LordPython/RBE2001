@@ -16,10 +16,14 @@ class ArmSystem {
 public:
     void init(Robot* robot);
 
+    void start();
+
     void setArm(Setpoint set);
     void setGripper(Setpoint set);
     void setSlide(Setpoint set);
 private:
+    Robot* robot;
+    
     class ArmIDA {
     public:
         void init(Robot* robot);

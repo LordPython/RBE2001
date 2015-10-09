@@ -5,11 +5,26 @@
 
 #include "Robot.h"
 #include "Ports.h"
+#include "Activity.h"
 
 #define DEBUG
 
 const byte TEAM = 15;
 Robot robot;
+
+bool button_hit = false;
+
+void buttonISR() {
+    button_hit = true;
+}
+
+class CalibrateActivity : public Activity {
+    virtual void run() {
+        robot.nav.calibrate();
+    }
+
+    virtual Priority priority() { return MAIN; }
+} calibrate_act;
 
 void setup() {
 //#ifdef DEBUG
@@ -17,9 +32,8 @@ void setup() {
 //#endif
     robot.init(TEAM);
     pinMode(START_BUTTON_PORT, INPUT_PULLUP);
-    while(digitalRead(START_BUTTON_PORT)) {
-        robot.nav.calibrate();
-    }
+    attachInterrupt(digitalPinToInterrupt(START_BUTTON_PORT), buttonISR, RISING);
+    robot.schedule(calibrate_act);
 }
 
 void loop() {
@@ -31,5 +45,13 @@ void loop() {
         default:
           break;
     }
+
+    if (button_hit) {
+        Serial.println("Starting!");
+        button_hit = false;
+        robot.deschedule(calibrate_act);
+        robot.start();
+    }
+    
     robot.runNext();
 }

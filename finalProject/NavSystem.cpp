@@ -4,7 +4,6 @@
 void NavSystem::init(Robot* robot) {
     this->robot = robot;
     nav_act.init(this);
-    robot->schedule(nav_act);
 
     pinMode(FRONT_BUMP_PORT, INPUT_PULLUP);
     left.init(LEFT_DRIVE_PORT);
@@ -13,6 +12,10 @@ void NavSystem::init(Robot* robot) {
     current = START;
     desired = START;
     current_command.type = DONE;
+}
+
+void NavSystem::start() {
+    robot->schedule(nav_act);
 }
 
 void NavSystem::go(Location loc) {

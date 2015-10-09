@@ -8,8 +8,10 @@ class Robot;
 class PlanSystem {
 public:
     void init(Robot* robot);
+    void start();
     void next();
 private:
+    Robot* robot;
     class PlanActivity : public Activity {
     public:
         void init(Robot* robot);

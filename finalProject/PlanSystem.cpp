@@ -2,8 +2,12 @@
 #include "Robot.h"
 
 void PlanSystem::init(Robot* robot) {
+    this->robot = robot;
     Serial.println("Plan init");
     plan_act.init(robot);
+}
+
+void PlanSystem::start() {
     robot->schedule(plan_act);
 }
 
