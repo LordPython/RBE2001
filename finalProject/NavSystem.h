@@ -8,26 +8,12 @@
 
 class Robot;
 
-enum Location { 
-    START,
-    REACTOR_A,
-    REACTOR_B,
-    STORAGE_1,
-    STORAGE_2,
-    STORAGE_3,
-    STORAGE_4,
-    SUPPLY_1,
-    SUPPLY_2,
-    SUPPLY_3,
-    SUPPLY_4,
-};
-
 class NavSystem {
 public:
     NavSystem() : qtrrc8(SENSOR_PINS, NUM_SENSORS, TIMEOUT, EMITTER_PIN) {}
     void init(Robot* robot);
     void start();
-    void go(Location loc);
+    void go(Vector new_pos);
     void calibrate();
 
     unsigned char SENSOR_PINS[8] = {52, 53, 50, 51, 48, 49, 46, 47};
@@ -42,8 +28,10 @@ private:
     Motor left;
     Motor right;
 
-    Location desired;
-    Location current;
+    Vector desired_pos;
+    Vector desired_dir;
+    Vector current_pos;
+    Vector current_dir;
 
     enum CommandType {
         BACK_UP, FORWARD, TURN_AROUND, TURN_LEFT, TURN_RIGHT, FOLLOW_LIMIT, FOLLOW_COUNT, DONE,

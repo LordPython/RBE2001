@@ -9,8 +9,9 @@ void NavSystem::init(Robot* robot) {
     left.init(LEFT_DRIVE_PORT);
     right.init(RIGHT_DRIVE_PORT);
 
-    current = START;
-    desired = START;
+    current_pos = START;
+    desired_pos = START;
+    current_dir = WEST;
     current_command.type = DONE;
 }
 
@@ -18,249 +19,78 @@ void NavSystem::start() {
     robot->schedule(nav_act);
 }
 
-void NavSystem::go(Location loc) {
-    desired = loc;
+void NavSystem::go(Vector new_pos) {
     nav_act.resetStateTime();
 
-    if (current != START) {
-        // Every navigation (except at the very start)
-        // starts by backing up and turning around
+    Vector tracking_pos = current_pos;
+    Vector tracking_dir = current_dir;
+    Serial.print("curd = (");
+    Serial.print(current_dir.x);
+    Serial.print(", ");
+    Serial.print(current_dir.y);
+    Serial.println(")");
+    Serial.print("cur = (");
+    Serial.print(current_pos.x);
+    Serial.print(", ");
+    Serial.print(current_pos.y);
+    Serial.println(")");
+
+    if (current_pos != START) {
         commands.insert(Command(BACK_UP));
         commands.insert(Command(TURN_AROUND));
+        tracking_dir = -tracking_dir;
+        commands.insert(Command(FOLLOW_COUNT, 1));
+        tracking_pos += tracking_dir;
+    }
+    Serial.print("trackd = (");
+    Serial.print(tracking_dir.x);
+    Serial.print(", ");
+    Serial.print(tracking_dir.y);
+    Serial.println(")");
+    Serial.print("track = (");
+    Serial.print(tracking_pos.x);
+    Serial.print(", ");
+    Serial.print(tracking_pos.y);
+    Serial.println(")");
+
+    int dist_along_center = new_pos.x - tracking_pos.x;
+    Serial.print("Dist along ctr: ");
+    Serial.println(dist_along_center);
+    int turn_dir = tracking_dir.cross(Vector{dist_along_center,0});
+
+    if (turn_dir > 0) {
+        commands.insert(Command(FORWARD));
+        commands.insert(Command(TURN_LEFT));
+        tracking_dir.rotate(LEFT);
+    } else if (turn_dir < 0) {
+        commands.insert(Command(FORWARD));
+        commands.insert(Command(TURN_RIGHT));
+        tracking_dir.rotate(RIGHT);
     }
 
-    switch(current) {
-    case START:
-        break;
-    case REACTOR_A:
-        switch(desired) {
-        case SUPPLY_1:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case SUPPLY_2:
-            commands.insert(Command(FOLLOW_COUNT, 2));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case SUPPLY_3:
-            commands.insert(Command(FOLLOW_COUNT, 3));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case SUPPLY_4:
-            commands.insert(Command(FOLLOW_COUNT, 4));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case STORAGE_1:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case STORAGE_2:
-            commands.insert(Command(FOLLOW_COUNT, 2));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case STORAGE_3:
-            commands.insert(Command(FOLLOW_COUNT, 3));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case STORAGE_4:
-            commands.insert(Command(FOLLOW_COUNT, 4));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        }
-        break;
-    case REACTOR_B:
-        switch(desired) {
-        case SUPPLY_1:
-            commands.insert(Command(FOLLOW_COUNT, 4));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_2:
-            commands.insert(Command(FOLLOW_COUNT, 3));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_3:
-            commands.insert(Command(FOLLOW_COUNT, 2));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_4:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case STORAGE_1:
-            commands.insert(Command(FOLLOW_COUNT, 4));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case STORAGE_2:
-            commands.insert(Command(FOLLOW_COUNT, 3));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case STORAGE_3:
-            commands.insert(Command(FOLLOW_COUNT, 2));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case STORAGE_4:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        }
-        break;
-    case SUPPLY_1:
-    case SUPPLY_2:
-    case SUPPLY_3:
-    case SUPPLY_4:
-        switch(desired) {
-        case REACTOR_A:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case REACTOR_B:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        }
-        break;
-    case STORAGE_1:
-        switch(desired) {
-        case SUPPLY_1:
-            break;
-        case SUPPLY_2:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case SUPPLY_3:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            commands.insert(Command(FOLLOW_COUNT, 2));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case SUPPLY_4:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            commands.insert(Command(FOLLOW_COUNT, 3));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        }
-        break;
-    case STORAGE_2:
-        switch(desired) {
-        case SUPPLY_1:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_2:
-            break;
-        case SUPPLY_3:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        case SUPPLY_4:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            commands.insert(Command(FOLLOW_COUNT, 2));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        }
-        break;
-    case STORAGE_3:
-        switch(desired) {
-        case SUPPLY_1:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            commands.insert(Command(FOLLOW_COUNT, 2));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_2:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_3:
-            break;
-        case SUPPLY_4:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            break;
-        }
-        break;
-    case STORAGE_4:
-        switch(desired) {
-        case SUPPLY_1:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            commands.insert(Command(FOLLOW_COUNT, 3));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_2:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            commands.insert(Command(FOLLOW_COUNT, 2));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_3:
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_RIGHT));
-            commands.insert(Command(FOLLOW_COUNT, 1));
-            commands.insert(Command(FORWARD));
-            commands.insert(Command(TURN_LEFT));
-            break;
-        case SUPPLY_4:
-            break;
-        }
-        break;
+    if (abs(dist_along_center) > 0) {
+        commands.insert(Command(FOLLOW_COUNT, abs(dist_along_center)));
     }
+
+    turn_dir = tracking_dir.cross(Vector{0, new_pos.y});
+
+    if (turn_dir > 0) {
+        commands.insert(Command(FORWARD));
+        commands.insert(Command(TURN_LEFT));
+        tracking_dir.rotate(LEFT);
+    } else if (turn_dir < 0) {
+        commands.insert(Command(FORWARD));
+        commands.insert(Command(TURN_RIGHT));
+        tracking_dir.rotate(RIGHT);
+    }
+
 
     // Every navigation ends at a limit
     commands.insert(Command(FOLLOW_LIMIT));
+
+    desired_dir = tracking_dir;
+    desired_pos = new_pos;
+
     next();
 }
 
@@ -322,7 +152,7 @@ void NavSystem::NavActivity::run() {
     switch (nav->current_command.type) {
     case BACK_UP: {
         int back_up_time = 400;
-        if (nav->current == REACTOR_B) {
+        if (nav->current_pos == REACTOR_B) {
             back_up_time = 2000;
         }
         if (timeSinceLastState > back_up_time) {
@@ -403,7 +233,8 @@ void NavSystem::NavActivity::run() {
         if (digitalRead(FRONT_BUMP_PORT)) {
             followLine();
         } else {
-            nav->current = nav->desired;
+            nav->current_pos = nav->desired_pos;
+            nav->current_dir = nav->desired_dir;
             lastStateTime = now;
             done_pause = false;
             nav->next();

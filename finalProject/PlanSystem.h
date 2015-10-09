@@ -36,6 +36,6 @@ private:
             GRIP_REACTOR_2,
             END,
         } state;
-        Location reactor;
+        Vector reactor;
     } plan_act;
 };

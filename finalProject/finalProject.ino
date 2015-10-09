@@ -32,20 +32,12 @@ void setup() {
 //#endif
     robot.init(TEAM);
     pinMode(START_BUTTON_PORT, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(START_BUTTON_PORT), buttonISR, RISING);
+    attachInterrupt(digitalPinToInterrupt(START_BUTTON_PORT), buttonISR, FALLING);
     robot.schedule(calibrate_act);
+    button_hit = false;
 }
 
 void loop() {
-    int b = Serial.read();
-    switch(b) {
-        case 'n':
-          robot.planner.next();
-          break;
-        default:
-          break;
-    }
-
     if (button_hit) {
         Serial.println("Starting!");
         button_hit = false;

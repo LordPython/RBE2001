@@ -81,3 +81,60 @@ private:
     T array[S];
 };
 
+struct Vector {
+    int x, y;
+
+    int cross(Vector other) {
+        return x*other.y - y*other.x;
+    }
+
+    int dot(Vector other) {
+        return x*other.x + y*other.y;
+    }
+
+    Vector operator-() {
+        return Vector { -x, -y };
+    }
+
+    void rotate(int r) {
+        if (r != 0) {
+            int t = x;
+            x = -r*y;
+            y =  r*t;
+        }
+    }
+};
+
+inline Vector operator+=(Vector& a, Vector b) {
+    a.x = a.x + b.x;
+    a.y = a.y + b.y;
+    return a;
+}
+
+inline bool operator==(Vector a, Vector b) {
+    return a.x == b.x && a.y == b.y;
+}
+
+inline bool operator!=(Vector a, Vector b) {
+    return a.x != b.x || a.y != b.y;
+}
+
+const Vector REACTOR_A = Vector { 0, 0 };
+const Vector REACTOR_B = Vector { 5, 0 };
+const Vector SUPPLY_1 = Vector { 1, -1 };
+const Vector SUPPLY_2 = Vector { 2, -1 };
+const Vector SUPPLY_3 = Vector { 3, -1 };
+const Vector SUPPLY_4 = Vector { 4, -1 };
+const Vector STORAGE_1 = Vector { 1, 1 };
+const Vector STORAGE_2 = Vector { 2, 1 };
+const Vector STORAGE_3 = Vector { 3, 1 };
+const Vector STORAGE_4 = Vector { 4, 1 };
+const Vector START = Vector { 1, 0 };
+
+const Vector NORTH = Vector { 0, 1 };
+const Vector SOUTH = Vector { 0, -1 };
+const Vector EAST = Vector { 1, 0 };
+const Vector WEST = Vector { -1, 0 };
+
+const int LEFT = 1;
+const int RIGHT = -1;
