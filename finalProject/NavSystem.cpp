@@ -24,38 +24,22 @@ void NavSystem::go(Vector new_pos) {
 
     Vector tracking_pos = current_pos;
     Vector tracking_dir = current_dir;
-    Serial.print("curd = (");
-    Serial.print(current_dir.x);
-    Serial.print(", ");
-    Serial.print(current_dir.y);
-    Serial.println(")");
-    Serial.print("cur = (");
-    Serial.print(current_pos.x);
-    Serial.print(", ");
-    Serial.print(current_pos.y);
-    Serial.println(")");
 
-    if (current_pos != START) {
-        commands.insert(Command(BACK_UP));
-        commands.insert(Command(TURN_AROUND));
-        tracking_dir = -tracking_dir;
-        commands.insert(Command(FOLLOW_COUNT, 1));
-        tracking_pos += tracking_dir;
+    if (current_pos == START) {
+        commands.insert(Command(FOLLOW_LIMIT));
+        desired_dir = WEST;
+        desired_pos = new_pos;
+        next();
+        return;
     }
-    Serial.print("trackd = (");
-    Serial.print(tracking_dir.x);
-    Serial.print(", ");
-    Serial.print(tracking_dir.y);
-    Serial.println(")");
-    Serial.print("track = (");
-    Serial.print(tracking_pos.x);
-    Serial.print(", ");
-    Serial.print(tracking_pos.y);
-    Serial.println(")");
+    
+    commands.insert(Command(BACK_UP));
+    commands.insert(Command(TURN_AROUND));
+    tracking_dir = -tracking_dir;
+    commands.insert(Command(FOLLOW_COUNT, 1));
+    tracking_pos += tracking_dir;
 
     int dist_along_center = new_pos.x - tracking_pos.x;
-    Serial.print("Dist along ctr: ");
-    Serial.println(dist_along_center);
     int turn_dir = tracking_dir.cross(Vector{dist_along_center,0});
 
     if (turn_dir > 0) {
@@ -118,7 +102,7 @@ void NavSystem::next() {
 
 void NavSystem::NavActivity::init(NavSystem* nav) {
     this->nav = nav;
-    pid.init(0.02, 0.0, 0.07);
+    pid.init(0.03, 0.0, 0.07);
     unsigned long now = millis();
     lastLineTime = now;
     lastStateTime = now;
@@ -138,6 +122,7 @@ void NavSystem::NavActivity::run() {
     unsigned long now = millis();
     unsigned long timeSinceLastState = now-lastStateTime;
 
+/*
     if (!done_pause) {
         if(timeSinceLastState >= 100) {
             done_pause = true;
@@ -148,6 +133,7 @@ void NavSystem::NavActivity::run() {
             return;
         }
     }
+*/
 
     switch (nav->current_command.type) {
     case BACK_UP: {
@@ -194,38 +180,27 @@ void NavSystem::NavActivity::run() {
     }
     case TURN_LEFT: {
         int position = nav->qtrrc8.readLine(sensorValues);
-        long sum = 0;
-        for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
-            sum += sensorValues[i];
-        }
-        //if(sum < 400) {
-        //if(now-lastStateTime > 1000) {
         
-        if (timeSinceLastState > 600 && ((position > 3000 && position < 4000))) {
+        if (timeSinceLastState > 500 && ((position > 3000 && position < 4000))) {
             nav->stop();
             nav->next();
             lastStateTime = now;
             done_pause = false;
         } else {
-            nav->drive(50,50);
+            nav->drive(60,60);
         }
         break;
     }
     case TURN_RIGHT: {
         int position = nav->qtrrc8.readLine(sensorValues);
-        long sum = 0;
-        for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
-            sum += sensorValues[i];
-        }
-        //if(sum < 400) {
-        //if(timeSinceLastState > 1000) {
-        if (timeSinceLastState > 700 && ((position > 3000 && position < 4000))) {
+        
+        if (timeSinceLastState > 500 && ((position > 3000 && position < 4000))) {
             nav->stop();
             nav->next();
             lastStateTime = now;
             done_pause = false;
         } else {
-            nav->drive(-50,-50);
+            nav->drive(-60,-60);
         }
         break;
     }
@@ -243,9 +218,7 @@ void NavSystem::NavActivity::run() {
         break;
     case FOLLOW_COUNT: {
         bool intersection = followLine();
-        if (intersection) intersections++;
-        if (intersections >= nav->current_command.intersections) {
-            intersections = 0;
+        if (intersection && --nav->current_command.intersections <= 0) {
             nav->stop();
             nav->next();
             lastStateTime = now;
@@ -280,8 +253,8 @@ bool NavSystem::NavActivity::followLine() {
     }
 
     int diff = pid.calc(position - 3500);
-    const int leftBaseSpeed = 40;
-    const int rightBaseSpeed = 55;
+    const int leftBaseSpeed = 50;
+    const int rightBaseSpeed = 50;
 
     nav->drive(diff - leftBaseSpeed, diff + rightBaseSpeed);
 

@@ -62,7 +62,6 @@ private:
         virtual void run();
         virtual Priority priority() { return CONTROL_LOOP; }
     private:
-        int intersections;
         bool done_pause;
         NavSystem* nav;
         PID pid;

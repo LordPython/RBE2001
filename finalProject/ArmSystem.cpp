@@ -3,8 +3,8 @@
 #include "Ports.h"
 
 // analog setpoints for arm up and down positions
-const int k_arm_up_setpoint = 270;
-const int k_arm_down_setpoint = 660;
+const int k_arm_up_setpoint = 300;
+const int k_arm_down_setpoint = 679;
 
 void ArmSystem::init(Robot* robot) {
     this->robot = robot;
@@ -71,7 +71,7 @@ void ArmSystem::ArmIDA::done() {
 void ArmSystem::ArmActivity::init(ArmIDA* arm_ida) {
     this->arm_ida = arm_ida;
     arm_ida->setArm(DOWN);
-    pid.init(0.8, 0.005, 2.5, 20);
+    pid.init(0.8, 0.005, 2.5, 10);
     arm_motor.init(ARM_MOTOR_PORT);
 }
 
@@ -80,7 +80,7 @@ void ArmSystem::ArmActivity::run() {
     int setpoint = desired == UP ? k_arm_up_setpoint : k_arm_down_setpoint;
     int current  = analogRead(ARM_POT_PORT);
     int error = current - setpoint;
-    if (abs(error) < 20) {
+    if (abs(error) < 10) {
         arm_ida->armAt(desired);
     }
     arm_motor.write(pid.calc(error));
@@ -122,7 +122,7 @@ void ArmSystem::GripperActivity::init(ArmIDA* arm_ida) {
 
 void ArmSystem::GripperActivity::run() {
     if (arm_ida->getGripper() == OPEN) {
-        gripper_motor.write(0);
+        gripper_motor.write(-10);
     } else {
         gripper_motor.write(90);
     }
