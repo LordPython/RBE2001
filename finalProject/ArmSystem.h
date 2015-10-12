@@ -58,7 +58,7 @@ private:
     class ArmActivity : public Activity {
     public:
         void init(ArmIDA* arm_ida);
-        virtual void run();
+        virtual bool run();
         virtual Priority priority() { return CONTROL_LOOP; }
     private:
         ArmIDA* arm_ida;
@@ -69,7 +69,7 @@ private:
     class SlideActivity : public Activity {
     public:
         void init(ArmIDA* arm_ida);
-        virtual void run();
+        virtual bool run();
         virtual Priority priority() { return CONTROL_LOOP; }
     private:
         ArmIDA* arm_ida;
@@ -79,7 +79,7 @@ private:
     class GripperActivity : public Activity {
     public:
         void init(ArmIDA* arm_ida);
-        virtual void run();
+        virtual bool run();
         virtual Priority priority() { return CONTROL_LOOP; }
     private:
 

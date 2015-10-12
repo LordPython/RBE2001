@@ -1,5 +1,23 @@
+#include <TimerThree.h>
 #include "NavSystem.h"
 #include "Robot.h"
+
+unsigned long timeEnabledCounter = 0;
+
+unsigned long timeEnabled() {
+    uint8_t saveSREG = SREG;
+    cli();
+    unsigned long t = timeEnabledCounter;
+    SREG = saveSREG;
+    return t;
+}
+
+void timer3() {
+    extern Robot robot;
+    if (robot.status.enabled()) {
+        timeEnabledCounter++;
+    }
+}
 
 void NavSystem::init(Robot* robot) {
     this->robot = robot;
@@ -13,6 +31,10 @@ void NavSystem::init(Robot* robot) {
     desired_pos = START;
     current_dir = WEST;
     current_command.type = DONE;
+
+    timeEnabledCounter = 0;
+    Timer3.initialize(1000);
+    Timer3.attachInterrupt(timer3);
 }
 
 void NavSystem::start() {
@@ -103,37 +125,44 @@ void NavSystem::next() {
 void NavSystem::NavActivity::init(NavSystem* nav) {
     this->nav = nav;
     pid.init(0.03, 0.0, 0.07);
-    unsigned long now = millis();
-    lastLineTime = now;
+    unsigned long now = timeEnabled();
     lastStateTime = now;
+    lastLineTime = now;
 }
 
 void NavSystem::NavActivity::resetStateTime() {
-    lastStateTime = millis();
-    done_pause = false;
+    lastStateTime = timeEnabled();
 }
 
-void NavSystem::NavActivity::run() {
-    if(!nav->robot->status.enabled()) {
-        nav->stop();
-        return;
-    }
-    unsigned int sensorValues[NUM_SENSORS];
-    unsigned long now = millis();
+bool NavSystem::NavActivity::run() {
+    unsigned long now = timeEnabled();
     unsigned long timeSinceLastState = now-lastStateTime;
+    unsigned long timeSinceLastLine = now-lastLineTime;
+    // Always read line sensor (so we know where the line was last seen
+    unsigned int sensorValues[NUM_SENSORS];
+    long position = nav->qtrrc8.readLine(sensorValues);
 
-/*
-    if (!done_pause) {
-        if(timeSinceLastState >= 100) {
-            done_pause = true;
-            lastStateTime = now;
-            timeSinceLastState = 0;
-        } else {
-            nav->stop();
-            return;
+    // Check if we've crossed an intersection
+    // This is checked by seening if the average of the sensor values is >900
+    if (timeSinceLastLine > 500) {
+        long sum = 0;
+        for (int i = 0; i < NUM_SENSORS; ++i) {
+            sum += sensorValues[i];
+        }
+        if (sum > 900*NUM_SENSORS) {
+            // If we've found and intersection, and are currently counting intersections,
+            // count it
+            if (nav->current_command.type == FOLLOW_COUNT) --nav->current_command.data;
+            // Reset time since we last saw a line.
+            lastLineTime = now;
         }
     }
-*/
+
+    // If the robot is not enabled, stop driving, and return
+    if(!nav->robot->status.enabled()) {
+        nav->stop();
+        return false;
+    } 
 
     switch (nav->current_command.type) {
     case BACK_UP: {
@@ -145,7 +174,6 @@ void NavSystem::NavActivity::run() {
             nav->stop();
             nav->next();
             lastStateTime = now;
-            done_pause = false;
         } else {
             nav->drive(50,-50);
         }
@@ -156,13 +184,12 @@ void NavSystem::NavActivity::run() {
             nav->stop();
             nav->next();
             lastStateTime = now;
-            done_pause = false;
         } else {
             nav->drive(-50,50);
         }
         break;
-    case TURN_AROUND: {
-        int error = nav->qtrrc8.readLine(sensorValues) - 3500;
+    case TURN_AROUND: /*{
+        int error = position - 3500;
         if (timeSinceLastState > 1100) {
             int diff = pid.calc(error);
             nav->drive(diff, diff);
@@ -170,35 +197,41 @@ void NavSystem::NavActivity::run() {
             if(error < 300) {
                 nav->stop();
                 nav->next();
-                lastStateTime = now;
-                done_pause = false;
+                timeSinceLastState = 0;
             }
         } else {
             nav->drive(90,90);
         }
         break;
-    }
+    }*/
     case TURN_LEFT: {
-        int position = nav->qtrrc8.readLine(sensorValues);
-        
-        if (timeSinceLastState > 500 && ((position > 3000 && position < 4000))) {
+        long sum = 0;
+        for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
+            sum += sensorValues[i];
+        }
+
+        if (sum < 100*NUM_SENSORS) { nav->current_command.data = 1; }
+      
+        if ((nav->current_command.data == 1) && ((position > 3000 && position < 4000))) {
             nav->stop();
             nav->next();
             lastStateTime = now;
-            done_pause = false;
         } else {
             nav->drive(60,60);
         }
         break;
     }
     case TURN_RIGHT: {
-        int position = nav->qtrrc8.readLine(sensorValues);
-        
-        if (timeSinceLastState > 500 && ((position > 3000 && position < 4000))) {
+        long sum = 0;
+        for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
+            sum += sensorValues[i];
+        }
+
+        if (sum < 100*NUM_SENSORS) { nav->current_command.data = 1; }
+        if ((nav->current_command.data == 1) && ((position > 3000 && position < 4000))) {
             nav->stop();
             nav->next();
             lastStateTime = now;
-            done_pause = false;
         } else {
             nav->drive(-60,-60);
         }
@@ -206,57 +239,35 @@ void NavSystem::NavActivity::run() {
     }
     case FOLLOW_LIMIT:
         if (digitalRead(FRONT_BUMP_PORT)) {
-            followLine();
+            followLine(position);
         } else {
             nav->current_pos = nav->desired_pos;
             nav->current_dir = nav->desired_dir;
             lastStateTime = now;
-            done_pause = false;
             nav->next();
             nav->stop();
         }
         break;
-    case FOLLOW_COUNT: {
-        bool intersection = followLine();
-        if (intersection && --nav->current_command.intersections <= 0) {
+    case FOLLOW_COUNT:
+        followLine(position);
+        if (nav->current_command.data <= 0) {
             nav->stop();
             nav->next();
             lastStateTime = now;
-            done_pause = false;
         }
         break;
-    }
     case DONE:
         nav->stop();
         break;
     }
+    return false;
 }
 
 
-bool NavSystem::NavActivity::followLine() {
-    unsigned long now = millis();
-
-    unsigned sensorValues[NavSystem::NUM_SENSORS];
-    long position = nav->qtrrc8.readLine(sensorValues);
-
-    bool intersection = false;
-
-    if (now - lastLineTime > 500) {
-        long sum = 0;
-        for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
-            sum += sensorValues[i];
-        }
-        if (sum > 900*8) {
-            intersection = true;
-            lastLineTime = now;
-        }
-    }
-
+void NavSystem::NavActivity::followLine(long position) {
     int diff = pid.calc(position - 3500);
     const int leftBaseSpeed = 50;
     const int rightBaseSpeed = 50;
 
     nav->drive(diff - leftBaseSpeed, diff + rightBaseSpeed);
-
-    return intersection;
 }

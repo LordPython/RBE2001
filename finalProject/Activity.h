@@ -11,9 +11,9 @@ class Activity {
 public:
     /**
      * Run the task once.
-     * @return whether or not to imediately requeue the task
+     * @return whether or not the activity has finished
      */
-    virtual void run() = 0;
+    virtual bool run() = 0;
     virtual Priority priority() = 0;
 
     inline void stim() { waiting = false; }

@@ -22,7 +22,7 @@ void PlanSystem::PlanActivity::init(Robot* robot) {
     wait();
 }
 
-void PlanSystem::PlanActivity::run() {
+bool PlanSystem::PlanActivity::run() {
     Serial.println("Running planner");
     switch(state) {
     case GO_TO_REACTOR_1:
@@ -152,7 +152,9 @@ void PlanSystem::PlanActivity::run() {
         robot->status.setRadiationLevel(NO_RAD);
         break;
     case END:
+        return true;
     default:
         break;
     }
+    return false;
 }

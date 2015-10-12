@@ -75,7 +75,7 @@ void ArmSystem::ArmActivity::init(ArmIDA* arm_ida) {
     arm_motor.init(ARM_MOTOR_PORT);
 }
 
-void ArmSystem::ArmActivity::run() {
+bool ArmSystem::ArmActivity::run() {
     Setpoint desired = arm_ida->getArm();
     int setpoint = desired == UP ? k_arm_up_setpoint : k_arm_down_setpoint;
     int current  = analogRead(ARM_POT_PORT);
@@ -84,6 +84,7 @@ void ArmSystem::ArmActivity::run() {
         arm_ida->armAt(desired);
     }
     arm_motor.write(pid.calc(error));
+    return false;
 }
 
 // -------------------------------------------------------- //
@@ -96,7 +97,7 @@ void ArmSystem::SlideActivity::init(ArmIDA* arm_ida) {
     slide_motor.init(SLIDE_MOTOR_PORT);
 }
 
-void ArmSystem::SlideActivity::run() {
+bool ArmSystem::SlideActivity::run() {
     Setpoint desired = arm_ida->getSlide();
     // the switches are normally open, so a digital 1 means
     // not pressed.
@@ -108,6 +109,7 @@ void ArmSystem::SlideActivity::run() {
         arm_ida->slideAt(desired);
         slide_motor.write(0);
     }
+    return false;
 }
 
 // -------------------------------------------------------- //
@@ -120,10 +122,11 @@ void ArmSystem::GripperActivity::init(ArmIDA* arm_ida) {
     gripper_motor.init(GRIPPER_MOTOR_PORT);
 }
 
-void ArmSystem::GripperActivity::run() {
+bool ArmSystem::GripperActivity::run() {
     if (arm_ida->getGripper() == OPEN) {
         gripper_motor.write(-10);
     } else {
         gripper_motor.write(90);
     }
+    return false;
 }

@@ -34,6 +34,15 @@ public:
         return false;
     }
 
+    bool removeAt(int i) {
+        if (i >= _size) return false;
+        --_size;
+        for (int j = i; j < _size; ++j) {
+            array[j] = array[j+1];
+        }
+        return true;
+    }
+
     T operator[](int i) {
 #ifdef DEBUG
         if (i >= _size) {
@@ -74,6 +83,11 @@ public:
             first = (first+1)%S;
             return true;
         } else return false;
+    }
+
+    bool peek(T& t) {
+        t = array[first];
+        return !empty();
     }
 private:
     size_t first;

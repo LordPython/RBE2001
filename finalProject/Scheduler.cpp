@@ -63,7 +63,9 @@ void Scheduler::runNext() {
         // run all control loops
         for(int i = 0; i < control_loop_queue.size(); ++i) {
             if(!control_loop_queue[i]->isWaiting()) {
-                control_loop_queue[i]->run();
+                if (control_loop_queue[i]->run()) {
+                    control_loop_queue.removeAt(i);
+                }
             }
         }
     } else {
@@ -72,7 +74,9 @@ void Scheduler::runNext() {
         if(curActIdx < main_queue.size() && main_queue.size() > 0) {
             // run the next activity
             if(!main_queue[curActIdx]->isWaiting()) {
-                main_queue[curActIdx]->run();
+                if(main_queue[curActIdx]->run()) {
+                    main_queue.removeAt(curActIdx);
+                }
             }
             ++curActIdx;
         } else {

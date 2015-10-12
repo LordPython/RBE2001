@@ -39,11 +39,11 @@ private:
     
     struct Command {
         CommandType type;
-        int intersections;
+        int data;
 
-        inline Command() : type(DONE), intersections(1) {}
-        inline Command(CommandType type) : type(type), intersections(1) {}
-        inline Command(CommandType type, int intersections) : type(type), intersections(intersections) {}
+        inline Command() : type(DONE), data(0) {}
+        inline Command(CommandType type) : type(type), data(0) {}
+        inline Command(CommandType type, int intersections) : type(type), data(intersections) {}
     };
 
     Command current_command;
@@ -59,14 +59,13 @@ private:
     public:
         void init(NavSystem* nav);
         void resetStateTime();
-        virtual void run();
+        virtual bool run();
         virtual Priority priority() { return CONTROL_LOOP; }
     private:
-        bool done_pause;
         NavSystem* nav;
         PID pid;
         unsigned long lastStateTime;
         unsigned long lastLineTime;
-        bool followLine();
+        void followLine(long position);
     } nav_act;
 };

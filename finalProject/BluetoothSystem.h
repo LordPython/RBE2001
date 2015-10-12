@@ -22,7 +22,7 @@ private:
     class ReadActivity : public Activity {
     public:
         void init(MessageHandler* handler, fc::Address addr);
-        virtual void run();
+        virtual bool run();
         virtual Priority priority() { return MAIN; }
     private:
         enum {
@@ -42,7 +42,7 @@ private:
     class HeartbeatActivity : public Activity {
     public:
         void init(fc::Address addr);
-        virtual void run();
+        virtual bool run();
         virtual Priority priority() { return MAIN; }
     private:
         fc::Address addr;

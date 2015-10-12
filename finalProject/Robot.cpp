@@ -16,6 +16,7 @@ void Robot::init(fc::Address addr) {
 
 void Robot::start() {
     if(!started) {
+        Serial.println("Starting!");
         started = true;
         planner.start();
         nav.start();

@@ -1,3 +1,4 @@
+#include <TimerThree.h>
 #include <LiquidCrystal.h>
 #include <Servo.h>
 #include <TimerOne.h>
@@ -19,17 +20,23 @@ void buttonISR() {
 }
 
 class CalibrateActivity : public Activity {
-    virtual void run() {
+    virtual bool run() {
         robot.nav.calibrate();
+
+        if (button_hit) {
+            button_hit = false;
+            robot.start();
+            return true;
+        }
+        
+        return false;
     }
 
     virtual Priority priority() { return MAIN; }
 } calibrate_act;
 
 void setup() {
-//#ifdef DEBUG
     Serial.begin(9600);
-//#endif
     robot.init(TEAM);
     pinMode(START_BUTTON_PORT, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(START_BUTTON_PORT), buttonISR, FALLING);
@@ -38,12 +45,5 @@ void setup() {
 }
 
 void loop() {
-    if (button_hit) {
-        Serial.println("Starting!");
-        button_hit = false;
-        robot.deschedule(calibrate_act);
-        robot.start();
-    }
-    
     robot.runNext();
 }

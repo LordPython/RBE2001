@@ -45,7 +45,7 @@ void BluetoothSystem::ReadActivity::init(fc::MessageHandler* handler, fc::Addres
 // Reads Serial3 data until there is no data to read
 // or until the next full message is read, whichever
 // comes first
-void BluetoothSystem::ReadActivity::run() {
+bool BluetoothSystem::ReadActivity::run() {
     int b;
     while((b = Serial3.read()) >= 0) {
         switch(state) {
@@ -76,16 +76,17 @@ void BluetoothSystem::ReadActivity::run() {
                 }
                 // Process no more than 1 message at a time
                 state = NO_MSG;
-                return;
+                return false;
             }
             break;
         }
     }
+    return false;
 }
 
 void BluetoothSystem::HeartbeatActivity::init(fc::Address addr) { this->addr = addr; }
 
-void BluetoothSystem::HeartbeatActivity::run() {
+bool BluetoothSystem::HeartbeatActivity::run() {
     // Construct heartbeat message
     fc::HeartbeatMessage hbmsg;
     hbmsg.src = addr;
@@ -93,4 +94,5 @@ void BluetoothSystem::HeartbeatActivity::run() {
     BluetoothSystem::send(fc::Message(hbmsg));
     // Run once a second
     waitFor(1000);
+    return false;
 }

@@ -15,7 +15,7 @@ private:
     class PlanActivity : public Activity {
     public:
         void init(Robot* robot);
-        virtual void run();
+        virtual bool run();
         virtual Priority priority() { return MAIN; }
     private:
         Robot* robot;
