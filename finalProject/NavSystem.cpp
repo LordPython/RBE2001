@@ -19,10 +19,8 @@ const int kNoLineThresh = 100;
 
 // Time in ms to backup for normally
 const unsigned long kNormalBackupTime = 400;
-// Time in ms to backup for when at reactor B.
-// This is to avoid a spot on the field where
-// the robot doesn't turn well
-const unsigned long kReactorBBackupTime = 2000;
+// Time in ms to backup for when at a reactor
+const unsigned long kReactorBackupTime = 2000;
 
 unsigned long timeEnabledCounter = 0;
 
@@ -202,8 +200,9 @@ bool NavSystem::NavActivity::run() {
     switch (nav->current_command.type) {
     case BACK_UP: {
         int back_up_time = kNormalBackupTime;
-        if (nav->current_pos == REACTOR_B) {
-            back_up_time = kReactorBBackupTime;
+        if (nav->current_pos == REACTOR_B ||
+            nav->current_pos == REACTOR_A ) {
+            back_up_time = kReactorBackupTime;
         }
         if (timeSinceLastState > back_up_time) {
             nav->stop();

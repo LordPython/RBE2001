@@ -8,7 +8,7 @@ const int k_arm_down_setpoint = 679;
 
 void ArmSystem::init(Robot* robot) {
     this->robot = robot;
-    
+
     pinMode(SLIDE_TOP_SWITCH_PORT, INPUT_PULLUP);
     pinMode(SLIDE_BOTTOM_SWITCH_PORT, INPUT_PULLUP);
 
@@ -70,7 +70,7 @@ void ArmSystem::ArmIDA::done() {
 void ArmSystem::ArmActivity::init(ArmIDA* arm_ida) {
     this->arm_ida = arm_ida;
     arm_ida->setArm(DOWN);
-    pid.init(0.8, 0.005, 2.5, 10);
+    pid.init(0.8, 0.007, 2.5, 10);
     arm_motor.init(ARM_MOTOR_PORT);
 }
 
