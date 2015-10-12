@@ -112,7 +112,6 @@ void NavSystem::drive(int left, int right) {
 }
 
 void NavSystem::next() {
-    //current = desired;
     bool available = commands.pop(current_command);
 
     if(!available) {
@@ -190,22 +189,7 @@ bool NavSystem::NavActivity::run() {
             nav->drive(-50,50);
         }
         break;
-    case TURN_AROUND: /*{
-        int error = position - 3500;
-        if (timeSinceLastState > 1100) {
-            int diff = pid.calc(error);
-            nav->drive(diff, diff);
-            
-            if(error < 300) {
-                nav->stop();
-                nav->next();
-                timeSinceLastState = 0;
-            }
-        } else {
-            nav->drive(90,90);
-        }
-        break;
-    }*/
+    case TURN_AROUND:
     case TURN_LEFT: {
         long sum = 0;
         for (int i = 0; i < NavSystem::NUM_SENSORS; ++i) {
