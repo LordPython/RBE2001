@@ -49,7 +49,6 @@ void ArmSystem::ArmIDA::armAt(Setpoint set) {
 }
 
 void ArmSystem::ArmIDA::slideAt(Setpoint set) {
-    
     if(slide_cur != set && slide_desired == set) {
         slide_cur = set;
         if (arm_cur == arm_desired) {

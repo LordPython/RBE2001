@@ -53,8 +53,8 @@ void NavSystem::init(Robot* robot) {
     right.init(RIGHT_DRIVE_PORT);
 
     // Robot starts in START position, facing west.
-    current_pos = START;
-    desired_pos = START;
+    current_pos = START_POS;
+    desired_pos = START_POS;
     current_dir = WEST;
     current_command.type = DONE;
 
@@ -83,7 +83,7 @@ void NavSystem::go(Vector new_pos) {
     Vector tracking_pos = current_pos;
     Vector tracking_dir = current_dir;
 
-    if (current_pos == START) {
+    if (current_pos == START_POS) {
         commands.insert(Command(FOLLOW_LIMIT));
         desired_dir = WEST;
         desired_pos = new_pos;

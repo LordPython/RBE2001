@@ -8,10 +8,16 @@
 #include "NavSystem.h"
 
 struct Robot : public Scheduler {
-    void init(fc::Address addr);
+    /**
+     * Initialize the robot and all its subsystems
+     */
+    void init(Address addr);
+    /** 
+     * Starts the activities necessary to run the robot
+     */
     void start();
 
-    fc::Address addr;
+    Address addr;
 
     BluetoothSystem bluetooth;
     ArmSystem arm;

@@ -20,7 +20,7 @@ void BluetoothSystem::init(Robot* robot)
     robot->schedule(hb_act);
 }
 
-void BluetoothSystem::send(fc::Message msg) {
+void BluetoothSystem::send(Message msg) {
     const size_t sz = 10;
     byte buf[sz];
     // Encode message
@@ -34,7 +34,7 @@ void BluetoothSystem::send(byte* msg, size_t len) {
     Serial3.write(msg, len);
 }
 
-void BluetoothSystem::ReadActivity::init(fc::MessageHandler* handler, fc::Address addr) { 
+void BluetoothSystem::ReadActivity::init(MessageHandler* handler, Address addr) { 
     if(handler == NULL) {
         Serial.println("Error: null handler in BluetoothSystem::ReadActivity::init");
     }
@@ -70,7 +70,7 @@ bool BluetoothSystem::ReadActivity::run() {
             // Read bytes until
             buf[2+bytes_read++] = b;
             if(bytes_read >= len-1) {
-                fc::Message m = fc::Message::decode(buf, BUF_SIZE);
+                Message m = Message::decode(buf, BUF_SIZE);
                 if (m.dst() == 0 || m.dst() == addr) {
                     m.handleWith(*handler);
                 }
@@ -84,14 +84,14 @@ bool BluetoothSystem::ReadActivity::run() {
     return false;
 }
 
-void BluetoothSystem::HeartbeatActivity::init(fc::Address addr) { this->addr = addr; }
+void BluetoothSystem::HeartbeatActivity::init(Address addr) { this->addr = addr; }
 
 bool BluetoothSystem::HeartbeatActivity::run() {
     // Construct heartbeat message
-    fc::HeartbeatMessage hbmsg;
+    HeartbeatMessage hbmsg;
     hbmsg.src = addr;
     hbmsg.dst = 0;
-    BluetoothSystem::send(fc::Message(hbmsg));
+    BluetoothSystem::send(Message(hbmsg));
     // Run once a second
     waitFor(1000);
     return false;

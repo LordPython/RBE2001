@@ -1,8 +1,6 @@
 #include "Message.h"
 #include "stdio.h"
 
-namespace fc {
-
 const uint8_t Message::start_delim = 0x5F;
 
 Type Message::type() {
@@ -325,76 +323,4 @@ Address Message::dst() {
         default:
             return 0;
     }
-}
-
-} // namespace fc
-
-// Message examples
-int test() {
-    uint8_t buf[7];
-    {
-        fc::HeartbeatMessage msg;
-        msg.src = 10;
-        msg.dst = 0;
-
-        const int len = 6;
-        uint8_t knownEncoding[len] = { 0x5F, 0x05, 0x07, 0x0A, 0x00, 0xE9 };
-
-        int bytes = fc::Message(msg).encode(buf, 7);
-        if (bytes != len) { printf("Message length did not match for message 1\n"); }
-
-        bool same = true;
-        for (int i = 0; i < bytes; ++i) {
-            if (buf[i] != knownEncoding[i]) same = false;
-            printf("0x%x ", buf[i]);
-        }
-        printf("\n");
-        if (!same) { printf("Encoded message did not match for message 1\n"); }
-
-        same = true;
-        bytes = fc::Message::decode(buf, 7).encode(buf, 7);
-        if (bytes != len) { printf("Reencoded message length did not match for message 1\n");  }
-        for (int i = 0; i < bytes; ++i) {
-            if (buf[i] != knownEncoding[i]) same = false;
-            printf("0x%x ", buf[i]);
-        }
-        printf("\n");
-        if (!same) { printf("Reencoded message did not match for message 1\n"); }
-    }
-
-    {
-        fc::StorageMessage msg;
-        msg.src = 0;
-        msg.dst = 0;
-        msg.availability.byte = 0;
-        msg.availability.tubes.tube1 = true;
-        msg.availability.tubes.tube3 = true;
-        int bytes = fc::Message(msg).encode(buf, 7);
-        for (int i = 0; i < bytes; ++i) {
-            printf("0x%x ", buf[i]);
-        }
-        printf("\n");
-        bytes = fc::Message::decode(buf, 7).encode(buf, 7);
-        for (int i = 0; i < bytes; ++i) {
-            printf("0x%x ", buf[i]);
-        }
-        printf("\n");
-    }
-
-    {
-        fc::StopMessage msg;
-        msg.src = 0;
-        msg.dst = 5;
-        int bytes = fc::Message(msg).encode(buf, 7);
-        for (int i = 0; i < bytes; ++i) {
-            printf("0x%x ", buf[i]);
-        }
-        printf("\n");
-        bytes = fc::Message::decode(buf, 7).encode(buf, 7);
-        for (int i = 0; i < bytes; ++i) {
-            printf("0x%x ", buf[i]);
-        }
-        printf("\n");
-    }
-    return 0;
 }

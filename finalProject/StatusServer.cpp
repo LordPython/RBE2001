@@ -20,33 +20,33 @@ void StatusServer::init(Robot* robot) {
 void StatusServer::setRadiationLevel(RadiationLevel l) {
     lvl = l;
     if (lvl != NO_RAD) {
-        fc::RadiationMessage msg;
+        RadiationMessage msg;
         msg.src = robot->addr;
         msg.dst = 0;
-        msg.level = lvl == HIGH_RAD ? fc::RadiationMessage::NEW : fc::RadiationMessage::SPENT;
+        msg.level = lvl == HIGH_RAD ? RadiationMessage::NEW : RadiationMessage::SPENT;
         robot->bluetooth.send(msg);
     }
     printRadiation();
 }
 
-void StatusServer::handle(const fc::StorageMessage& msg) {
+void StatusServer::handle(const StorageMessage& msg) {
     _storage = msg.availability.tubes;
     printStorage();
 }
 
-void StatusServer::handle(const fc::SupplyMessage& msg) {
+void StatusServer::handle(const SupplyMessage& msg) {
     _supply = msg.availability.tubes;
     printSupply();
 }
 
-void StatusServer::handle(const fc::StopMessage& msg) {
+void StatusServer::handle(const StopMessage& msg) {
     Serial.println("Stop");
     Serial.flush();
     _enabled = false;
     printStopped();
 }
 
-void StatusServer::handle(const fc::StartMessage& msg) {
+void StatusServer::handle(const StartMessage& msg) {
     Serial.println("Start");
     Serial.flush();
     _enabled = true;

@@ -1,6 +1,6 @@
 #include "Robot.h"
 
-void Robot::init(fc::Address addr) {
+void Robot::init(Address addr) {
     // Initialize scheduler
     Scheduler::init();
 

@@ -34,8 +34,8 @@ bool PlanSystem::PlanActivity::run() {
     case GRIP_REACTOR_1: {
         Serial.println("Grip reactor 1");
         robot->arm.setGripper(CLOSE);
-        fc::Availability storage = robot->status.storage();
-        fc::Availability supply = robot->status.supply();
+        Availability storage = robot->status.storage();
+        Availability supply = robot->status.supply();
         Serial.print("Storage status: ");
         Serial.print(storage.tube1);
         Serial.print(storage.tube2);
@@ -65,7 +65,7 @@ bool PlanSystem::PlanActivity::run() {
         break;
     case GO_TO_STORAGE: {
         Serial.println("Go to storage");
-        fc::Availability storage = robot->status.storage();
+        Availability storage = robot->status.storage();
         Serial.print("Storage status: ");
         Serial.print(storage.tube1);
         Serial.print(storage.tube2);
@@ -94,18 +94,13 @@ bool PlanSystem::PlanActivity::run() {
         robot->status.setRadiationLevel(NO_RAD);
         break;
     case GO_TO_SUPPLY: {      
-        fc::Availability supply = robot->status.supply();
-        Serial.print("Supply status: ");
-        Serial.print(supply.tube1);
-        Serial.print(supply.tube2);
-        Serial.print(supply.tube3);
-        Serial.println(supply.tube4);
+        Availability supply = robot->status.supply();
         if(supply.tube1) robot->nav.go(SUPPLY_1);
         else if(supply.tube2) robot->nav.go(SUPPLY_2);
         else if(supply.tube3) robot->nav.go(SUPPLY_3);
         else if(supply.tube4) robot->nav.go(SUPPLY_4);
         else {
-            Serial.println("No availabe supply, going to supply 1");
+            // Problem not solvable. Just go to supply 1
             robot->nav.go(SUPPLY_1);
         }
         // pick filled supply
