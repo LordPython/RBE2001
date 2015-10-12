@@ -4,7 +4,7 @@
 
 unsigned long timeEnabledCounter = 0;
 
-unsigned long timeEnabled() {
+unsigned long runningTime() {
     uint8_t saveSREG = SREG;
     cli();
     unsigned long t = timeEnabledCounter;
@@ -13,6 +13,8 @@ unsigned long timeEnabled() {
 }
 
 void timer3() {
+    // This method can't be a memeber function since it is passed
+    // to Timer3 as 
     extern Robot robot;
     if (robot.status.enabled()) {
         timeEnabledCounter++;
@@ -125,17 +127,17 @@ void NavSystem::next() {
 void NavSystem::NavActivity::init(NavSystem* nav) {
     this->nav = nav;
     pid.init(0.03, 0.0, 0.07);
-    unsigned long now = timeEnabled();
+    unsigned long now = runningTime();
     lastStateTime = now;
     lastLineTime = now;
 }
 
 void NavSystem::NavActivity::resetStateTime() {
-    lastStateTime = timeEnabled();
+    lastStateTime = runningTime();
 }
 
 bool NavSystem::NavActivity::run() {
-    unsigned long now = timeEnabled();
+    unsigned long now = runningTime();
     unsigned long timeSinceLastState = now-lastStateTime;
     unsigned long timeSinceLastLine = now-lastLineTime;
     // Always read line sensor (so we know where the line was last seen
