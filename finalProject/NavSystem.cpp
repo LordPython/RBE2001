@@ -2,6 +2,28 @@
 #include "NavSystem.h"
 #include "Robot.h"
 
+// Time to wait between counting intersections
+// so we don't count the same intersection
+// multiple times
+const unsigned long kLineTimeout = 500;
+
+// Threshold for counting an intersection;
+// average of the sensor values (which range 0-1000) 
+// must be above this value to count as an intersection
+const int kIntersectionThresh = 900;
+
+// Threshold for determining if there is no line;
+// average of the sensor values (which range 0-1000) 
+// must be below this value to count as no line.
+const int kNoLineThresh = 100;
+
+// Time in ms to backup for normally
+const unsigned long kNormalBackupTime = 400;
+// Time in ms to backup for when at reactor B.
+// This is to avoid a spot on the field where
+// the robot doesn't turn well
+const unsigned long kReactorBBackupTime = 2000;
+
 unsigned long timeEnabledCounter = 0;
 
 unsigned long runningTime() {
@@ -14,7 +36,8 @@ unsigned long runningTime() {
 
 void timer3() {
     // This method can't be a memeber function since it is passed
-    // to Timer3 as 
+    // to Timer3 as an ISR, but we need access to the robot object.
+    // 
     extern Robot robot;
     if (robot.status.enabled()) {
         timeEnabledCounter++;
@@ -29,20 +52,31 @@ void NavSystem::init(Robot* robot) {
     left.init(LEFT_DRIVE_PORT);
     right.init(RIGHT_DRIVE_PORT);
 
+    // Robot starts in START position, facing west.
     current_pos = START;
     desired_pos = START;
     current_dir = WEST;
     current_command.type = DONE;
 
+    // reset time enabled counter
     timeEnabledCounter = 0;
+    
+    // Setup timer3 to run once per ms.
     Timer3.initialize(1000);
     Timer3.attachInterrupt(timer3);
 }
 
+/**
+ * Schedule navigation activity
+ */
 void NavSystem::start() {
     robot->schedule(nav_act);
 }
 
+/** 
+ *  Compute the route from current position to specified position,
+ *  and setup the system to go there.
+ */
 void NavSystem::go(Vector new_pos) {
     nav_act.resetStateTime();
 
@@ -125,7 +159,7 @@ void NavSystem::next() {
 
 void NavSystem::NavActivity::init(NavSystem* nav) {
     this->nav = nav;
-    pid.init(0.03, 0.0, 0.07);
+    pid.init(0.02, 0.0, 0.07);
     unsigned long now = runningTime();
     lastStateTime = now;
     lastLineTime = now;
@@ -145,12 +179,12 @@ bool NavSystem::NavActivity::run() {
 
     // Check if we've crossed an intersection
     // This is checked by seening if the average of the sensor values is >900
-    if (timeSinceLastLine > 500) {
+    if (timeSinceLastLine > kLineTimeout) {
         long sum = 0;
         for (int i = 0; i < NUM_SENSORS; ++i) {
             sum += sensorValues[i];
         }
-        if (sum > 900*NUM_SENSORS) {
+        if (sum > kIntersectionThresh*NUM_SENSORS) {
             // If we've found and intersection, and are currently counting intersections,
             // count it
             if (nav->current_command.type == FOLLOW_COUNT) --nav->current_command.data;
@@ -167,9 +201,9 @@ bool NavSystem::NavActivity::run() {
 
     switch (nav->current_command.type) {
     case BACK_UP: {
-        int back_up_time = 400;
+        int back_up_time = kNormalBackupTime;
         if (nav->current_pos == REACTOR_B) {
-            back_up_time = 2000;
+            back_up_time = kReactorBBackupTime;
         }
         if (timeSinceLastState > back_up_time) {
             nav->stop();
@@ -189,6 +223,9 @@ bool NavSystem::NavActivity::run() {
             nav->drive(-50,50);
         }
         break;
+    // Turning around follows the same process as turning left or right:
+    // turn until you don't see the line, then turn until the line is
+    // roughly centered.
     case TURN_AROUND:
     case TURN_LEFT: {
         long sum = 0;
@@ -213,7 +250,7 @@ bool NavSystem::NavActivity::run() {
             sum += sensorValues[i];
         }
 
-        if (sum < 100*NUM_SENSORS) { nav->current_command.data = 1; }
+        if (sum < kNoLineThresh*NUM_SENSORS) { nav->current_command.data = 1; }
         if ((nav->current_command.data == 1) && ((position > 3000 && position < 4000))) {
             nav->stop();
             nav->next();
@@ -251,7 +288,10 @@ bool NavSystem::NavActivity::run() {
 
 
 void NavSystem::NavActivity::followLine(long position) {
-    int diff = pid.calc(position - 3500);
+    // position is in the range 0..1000*(NUM_SENSORS-1).
+    // We want to keep the line in the middle, so setpoint
+    // should be 1000*(NUM_SENSORS-1)/2
+    int diff = pid.calc(position - 1000*(NUM_SENSORS-1)/2);
     const int leftBaseSpeed = 50;
     const int rightBaseSpeed = 50;
 
