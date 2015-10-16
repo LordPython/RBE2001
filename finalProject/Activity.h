@@ -13,36 +13,38 @@ enum Priority {
 };
 
 /**
- * An activity is essentially an piece of code which gets run periodically
+ * @brief An activity is essentially an piece of code which gets run periodically
  **/
 class Activity {
 public:
     /**
-     * Run the task once.
+     * @brief Run the task once.
      * @return whether or not the activity has finished
      */
     virtual bool run() = 0;
     /**
-     * Determines which priority to run the activity at
+     * @brief The priority to run the activity at
      * @return Priority level for activity
      **/
     virtual Priority priority() = 0;
 
     /**
-     * Wake up the activity
+     * @brief Wake up the activity
      **/
     inline void stim() { waiting = false; }
     /**
-     * Check if the activity is currently waiting
+     * @brief Check if the activity is currently waiting
      **/
     inline bool isWaiting() { if(millis() > timeout) { stim(); timeout = -1; } return waiting; }
 protected:
     /**
+     * @breif wait for an external stim()
      * To be called by activity to wait for external stim()
      * When an activity is waiting, its run() method will not be called
      **/
     inline void wait() { waiting = true; timeout = -1; }
     /**
+     * @breif wait for the specified time
      * To be called by activity to wait for external stim() or
      * specified timeout
      * @param ms Timeout in ms for waiting.

@@ -20,28 +20,28 @@ enum Setpoint {
 };
 
 /**
- * System to control the arm, slide and gripper
+ * @brief System to control the arm, slide and gripper
  **/
 class ArmSystem {
 public:
     /**
-     * Initialize the subsystem
+     * @brief Initialize the subsystem
      **/
     void init(Robot* robot);
     /**
-     * Schedule the activities to control the arm, slide and gripper
+     * @brief Schedule the activities to control the arm, slide and gripper
      **/
     void start();
     /**
-     * Set the setpoint for the arm control activity
+     * @brief Set the setpoint for the arm control activity
      **/
     void setArm(Setpoint set);
     /**
-     * Set the setpoint for the gripper control activity
+     * @brief Set the setpoint for the gripper control activity
      **/
     void setGripper(Setpoint set);
     /**
-     * Set the setpoint for the slide control activity
+     * @brief Set the setpoint for the slide control activity
      **/
     void setSlide(Setpoint set);
 private:
@@ -49,7 +49,7 @@ private:
     Robot* robot;
 
     /**
-     * Object to facilitate communication between the activites
+     * @breif Facilitates communication between the activites
      * within the arm system and the rest of the system.
      *
      * (IDA stands for Intercommunication Data Area).
@@ -57,18 +57,20 @@ private:
     class ArmIDA {
     public:
         /**
-         * Initialize the object
+         * @brief Initialize the object
          * @param robot Pointer to the robot object
          **/
         void init(Robot* robot);
 
         /**
+         * @breif Update current position of arm
          * Called by the arm activity indicating that the
          * arm is at the given setpoint
          * @param set Setpoint indicating current position of the arm
          **/
         void armAt(Setpoint set);
         /**
+         * @breif Update current position of slide
          * Called by the slide activity indicating that the
          * slide is at the given setpoint
          * @param set Setpoint indicating current position of the slide
@@ -78,33 +80,33 @@ private:
         // No protection necessary on these variables, only ever modified
         // by activities (not interrupts)
         /**
-         * Set desired arm position
+         * @breif Set desired arm position
          * @param set desired arm position
          **/
         inline void setArm(Setpoint set) { arm_desired = set; }
         /**
-         * Set desired gripper position
+         * @breif Set desired gripper position
          * @param set desired gripper position
          **/
         inline void setGripper(Setpoint set) { gripper_desired = set; }
         /**
-         * Set desired slide position
+         * @breif Set desired slide position
          * @param set desired slide position
          **/
         inline void setSlide(Setpoint set) { slide_desired = set; }
 
         /**
-         * Gets arm setpoint
+         * @breif Gets arm setpoint
          * @return arm setpoint
          **/
         inline Setpoint getArm() { return arm_desired; }
         /**
-         * Gets gripper setpoint
+         * @breif Gets gripper setpoint
          * @return gripper setpoint
          **/
         inline Setpoint getGripper() { return gripper_desired; }
         /**
-         * Gets slide setpoint
+         * @breif Gets slide setpoint
          * @return slide setpoint
          **/
         inline Setpoint getSlide() { return slide_desired; }
@@ -128,12 +130,12 @@ private:
     } arm_ida;
 
     /**
-     * Control loop activity to run the arm
+     * @breif Control loop activity to run the arm
      **/
     class ArmActivity : public Activity {
     public:
         /**
-         * Initialize activity
+         * @breif Initialize activity
          * @param arm_ida pointer to the control object
          **/
         void init(ArmIDA* arm_ida);
@@ -150,7 +152,7 @@ private:
     } arm_act;
 
     /**
-     * Control loop activity to run the slide
+     * @breif Control loop activity to run the slide
      **/
     class SlideActivity : public Activity {
     public:
@@ -165,7 +167,7 @@ private:
     } slide_act;
 
     /**
-     * Control loop activity to run the gripper
+     * @breif Control loop activity to run the gripper
      **/
     class GripperActivity : public Activity {
     public:
